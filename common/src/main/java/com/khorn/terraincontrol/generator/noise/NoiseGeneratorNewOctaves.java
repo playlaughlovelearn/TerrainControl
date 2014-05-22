@@ -21,7 +21,7 @@ public class NoiseGeneratorNewOctaves {
         double d3 = 1.0D;
 
         for (int i = 0; i < this.b; ++i) {
-            d2 += this.a[i].a(d0 * d3, d1 * d3) / d3;
+            d2 += this.a[i].noise(d0 * d3, d1 * d3) / d3;
             d3 /= 2.0D;
         }
 
@@ -45,7 +45,7 @@ public class NoiseGeneratorNewOctaves {
         double d7 = 1.0D;
 
         for (int l = 0; l < this.b; ++l) {
-            this.a[l].a(adouble, d0, d1, i, j, d2 * d7 * d6, d3 * d7 * d6, 0.55D / d6);
+            this.a[l].noise(adouble, d0, d1, i, j, d2 * d7 * d6, d3 * d7 * d6, 0.55D / d6);
             d7 *= d4;
             d6 *= d5;
         }

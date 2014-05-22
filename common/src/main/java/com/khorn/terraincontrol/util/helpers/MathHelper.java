@@ -11,38 +11,31 @@ public class MathHelper
         return (float) Math.sqrt(paramFloat);
     }
 
-    public static float sin(float paramFloat)
+    public static float sin(float x)
     {
-        return a[((int) (paramFloat * 10430.378F) & 0xFFFF)];
+        return a[((int) (x * 10430.378F) & 0xFFFF)];
     }
 
-    public static float cos(float paramFloat)
+    public static float cos(float x)
     {
-        return a[((int) (paramFloat * 10430.378F + 16384.0F) & 0xFFFF)];
+        return a[((int) (x * 10430.378F + 16384.0F) & 0xFFFF)];
     }
 
-    public static int floor(double d0)
+    public static int floor(double x)
     {
-        int i = (int) d0;
-
-        return d0 < (double) i ? i - 1 : i;
+        int i = (int) x;
+        return x < (double) i ? i - 1 : i;
     }
 
-    public static long floor_double_long(double d)
+    public static long floor_double_long(double x)
     {
-        long l = (long) d;
-        return d >= (double) l ? l : l - 1L;
+        long l = (long) x;
+        return x >= (double) l ? l : l - 1L;
     }
 
-    public static int abs(int number)
+    public static int abs(int x)
     {
-        if (number > 0)
-        {
-            return number;
-        } else
-        {
-            return -number;
-        }
+        return (x > 0) ? x : -x;
     }
 
     /**

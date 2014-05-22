@@ -4,45 +4,47 @@ import java.util.Random;
 
 public class NoiseGeneratorOldOctaves
 {
-    private NoiseGeneratorOld[] a;
-    private int b;
 
-    public NoiseGeneratorOldOctaves(Random paramRandom, int paramInt)
+    private NoiseGeneratorOld[] generatorCollection;
+    private int octaves;
+
+    public NoiseGeneratorOldOctaves(Random random, int numOctaves)
     {
-        this.b = paramInt;
-        this.a = new NoiseGeneratorOld[paramInt];
-        for (int i = 0; i < paramInt; i++)
-            this.a[i] = new NoiseGeneratorOld(paramRandom);
+        this.octaves = numOctaves;
+        this.generatorCollection = new NoiseGeneratorOld[numOctaves];
+        for (int i = 0; i < numOctaves; i++)
+            this.generatorCollection[i] = new NoiseGeneratorOld(random);
     }
 
-    public double[] a(double[] paramArrayOfDouble, double paramDouble1, double paramDouble2, int paramInt1, int paramInt2, double paramDouble3, double paramDouble4, double paramDouble5)
+    public double[] generateOctaves(double[] octaves, double Xin, double Yin, int Xmax, int Ymax, double Xscale, double Yscale, double someScaleValue)
     {
-        return a(paramArrayOfDouble, paramDouble1, paramDouble2, paramInt1, paramInt2, paramDouble3, paramDouble4, paramDouble5, 0.5D);
+        return generateOctaves(octaves, Xin, Yin, Xmax, Ymax, Xscale, Yscale, someScaleValue, 0.5D);
     }
 
-    public double[] a(double[] paramArrayOfDouble, double paramDouble1, double paramDouble2, int paramInt1, int paramInt2, double paramDouble3, double paramDouble4, double paramDouble5, double paramDouble6)
+    public double[] generateOctaves(double[] octaves, double Xin, double Yin, int Xmax, int Ymax, double Xscale, double Yscale, double someScaleValue, double someOtherScaleValue)
     {
-        paramDouble3 /= 1.5D;
-        paramDouble4 /= 1.5D;
+        Xscale /= 1.5D;
+        Yscale /= 1.5D;
 
-        if ((paramArrayOfDouble == null) || (paramArrayOfDouble.length < paramInt1 * paramInt2))
-            paramArrayOfDouble = new double[paramInt1 * paramInt2];
+        if ((octaves == null) || (octaves.length < Xmax * Ymax))
+            octaves = new double[Xmax * Ymax];
         else
         {
-            for (int i = 0; i < paramArrayOfDouble.length; i++)
+            for (int i = 0; i < octaves.length; i++)
             {
-                paramArrayOfDouble[i] = 0.0D;
+                octaves[i] = 0.0D;
             }
         }
         double d1 = 1.0D;
         double d2 = 1.0D;
-        for (int j = 0; j < this.b; j++)
+        for (int j = 0; j < this.octaves; j++)
         {
-            this.a[j].a(paramArrayOfDouble, paramDouble1, paramDouble2, paramInt1, paramInt2, paramDouble3 * d2, paramDouble4 * d2, 0.55D / d1);
-            d2 *= paramDouble5;
-            d1 *= paramDouble6;
+            this.generatorCollection[j].noise(octaves, Xin, Yin, Xmax, Ymax, Xscale * d2, Yscale * d2, 0.55D / d1);
+            d2 *= someScaleValue;
+            d1 *= someOtherScaleValue;
         }
 
-        return paramArrayOfDouble;
+        return octaves;
     }
+
 }
