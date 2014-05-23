@@ -1,6 +1,5 @@
 package com.khorn.terraincontrol.generator.biome.layers;
 
-
 import com.khorn.terraincontrol.LocalBiome;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
@@ -14,45 +13,45 @@ import java.util.ArrayList;
 
 public abstract class Layer
 {
+
     protected long worldGenSeed;
     protected Layer child;
     private long chunkSeed;
     protected long baseSeed;
 
     /*
-    LayerIsland - chance to big land
-    LayerLandRandom - a(3) - chance to increase big land
-    GenLayerIcePlains - chance to ice
-    GenLayerMushroomIsland - chance to mushroom island
-
-    biome:
-    1) is island
-    2) size
-    3) chance
-    4) is shore
-    5) color
-    6) temperature
-    7) downfall
-    8) is snow biome
-    9) Have rivers
-
-    world
-    1) chance to lands
-    2) size of big lands
-    3) chance to increase lands
-    4) Chance for ice area
-    5) Ice area size
-    6) Rivers
-    7) Rivers size
-    */
-
-    protected static final int BiomeBits = 1023; // 255 63
-    protected static final int LandBit = 1024;   // 256 64
-    protected static final int RiverBits = 12288; //3072 768
-    protected static final int RiverBitOne = 4096;
-    protected static final int RiverBitTwo = 8192;
-    protected static final int IceBit = 2048;   // 512  128
-    protected static final int IslandBit = 16384; // 4096 1024
+     * LayerIsland - chance to big land
+     * LayerLandRandom - a(3) - chance to increase big land
+     * GenLayerIcePlains - chance to ice
+     * GenLayerMushroomIsland - chance to mushroom island
+     *
+     * biome:
+     * 1) is island
+     * 2) size
+     * 3) chance
+     * 4) is shore
+     * 5) color
+     * 6) temperature
+     * 7) downfall
+     * 8) is snow biome
+     * 9) Have rivers
+     *
+     * world
+     * 1) chance to lands
+     * 2) size of big lands
+     * 3) chance to increase lands
+     * 4) Chance for ice area
+     * 5) Ice area size
+     * 6) Rivers
+     * 7) Rivers size
+     */
+    protected static final short BiomeBits = 1023; // 255 63
+    protected static final short LandBit = 1024;   // 256 64
+    protected static final short RiverBits = 12288; //3072 768
+    protected static final short RiverBitOne = 4096;
+    protected static final short RiverBitTwo = 8192;
+    protected static final short IceBit = 2048;   // 512  128
+    protected static final short IslandBit = 16384; // 4096 1024
 
     protected static int GetBiomeFromLayer(int BiomeAndLand)
     {
@@ -65,11 +64,10 @@ public abstract class Layer
     {
 
         /*
-        int BigLandSize = 2;  //default 0, more - smaller
-        int ChanceToIncreaseLand = 6; //default 4
-        int MaxDepth = 10;
-        */
-
+         * int BigLandSize = 2; //default 0, more - smaller
+         * int ChanceToIncreaseLand = 6; //default 4
+         * int MaxDepth = 10;
+         */
         WorldSettings configs = world.getSettings();
         WorldConfig worldConfig = configs.worldConfig;
 
@@ -85,7 +83,7 @@ public abstract class Layer
             {
                 if (biome == null)
                     continue;
-                
+
                 BiomeConfig biomeConfig = biome.getBiomeConfig();
 
                 if (biomeConfig.biomeSize != i)
@@ -124,7 +122,6 @@ public abstract class Layer
         Layer RiverLayer = new LayerEmpty(1L);
         boolean riversStarted = false;
 
-
         for (int depth = 0; depth <= worldConfig.GenerationDepth; depth++)
         {
 
@@ -142,7 +139,6 @@ public abstract class Layer
             if (depth < (worldConfig.LandSize + worldConfig.LandFuzzy))
                 MainLayer = new LayerLandRandom(depth, MainLayer);
 
-
             if (NormalBiomeMap[depth].length != 0 || IceBiomeMap[depth].length != 0)
             {
 
@@ -151,7 +147,6 @@ public abstract class Layer
                 layerBiome.ice_biomes = IceBiomeMap[depth];
                 MainLayer = layerBiome;
             }
-
 
             if (worldConfig.IceSize == depth)
                 MainLayer = new LayerIce(depth, MainLayer, worldConfig.IceRarity);
@@ -163,7 +158,6 @@ public abstract class Layer
                     riversStarted = true;
                 } else
                     MainLayer = new LayerRiverInit(155, MainLayer);
-
 
             if ((worldConfig.GenerationDepth - worldConfig.riverSize) == depth)
             {
@@ -215,13 +209,11 @@ public abstract class Layer
                 }
             }
 
-
             if (haveBorder)
             {
                 layerBiomeBorder.child = MainLayer;
                 MainLayer = layerBiomeBorder;
             }
-
 
         }
         if (worldConfig.randomRivers)
@@ -240,17 +232,96 @@ public abstract class Layer
                 MainLayer = new LayerFromImage(1L, null, worldConfig, world);
         }
 
-
         Layer ZoomedLayer = new LayerZoomVoronoi(10L, MainLayer);
 
         //TemperatureLayer = new LayerTemperatureMix(TemperatureLayer, ZoomedLayer, 0, config);
-
-        ZoomedLayer.SetWorldSeed(seed);
+        ZoomedLayer.initWorldGenSeed(seed);
 
         //MainLayer = new LayerCacheInit(1, MainLayer);
         //ZoomedLayer = new LayerCacheInit(1, ZoomedLayer);
+        return new Layer[]
+        {
+            MainLayer, ZoomedLayer
+        };
 
-        return new Layer[]{MainLayer, ZoomedLayer};
+        //>>	
+        //>>	START MCP CODE
+        //>>	
+//        boolean flag = false;
+//        GenLayerIsland MainLayer = new GenLayerIsland(1L);
+//        GenLayerFuzzyZoom mlA = new GenLayerFuzzyZoom(2000L, MainLayer);
+//        GenLayerAddIsland mlB = new GenLayerAddIsland(1L, mlA);
+//        GenLayerZoom mlC = new GenLayerZoom(2001L, mlB);
+//        mlB = new GenLayerAddIsland(2L, mlC);
+//        mlB = new GenLayerAddIsland(50L, mlB);
+//        mlB = new GenLayerAddIsland(70L, mlB);
+//        GenLayerRemoveTooMuchOcean mlD = new GenLayerRemoveTooMuchOcean(2L, mlB);
+//        GenLayerAddSnow mlE = new GenLayerAddSnow(2L, mlD);
+//        mlB = new GenLayerAddIsland(3L, mlE);
+//        GenLayerEdge mlF = new GenLayerEdge(2L, mlB, GenLayerEdge.Mode.COOL_WARM);
+//        mlF = new GenLayerEdge(2L, mlF, GenLayerEdge.Mode.HEAT_ICE);
+//        mlF = new GenLayerEdge(3L, mlF, GenLayerEdge.Mode.SPECIAL);
+//        mlC = new GenLayerZoom(2002L, mlF);
+//        mlC = new GenLayerZoom(2003L, mlC);
+//        mlB = new GenLayerAddIsland(4L, mlC);
+//        GenLayerAddMushroomIsland mlG = new GenLayerAddMushroomIsland(5L, mlB);
+//        GenLayerDeepOcean mlH = new GenLayerDeepOcean(4L, mlG);
+//        GenLayer mlJ = GenLayerZoom.magnify(1000L, mlH, 0);
+//        byte var5 = 4;
+//
+//        if (worldType == WorldType.LARGE_BIOMES)
+//        {
+//            var5 = 6;
+//        }
+//
+//        if (flag)
+//        {
+//            var5 = 4;
+//        }
+//
+//        GenLayer mlK = GenLayerZoom.magnify(1000L, mlJ, 0);
+//        GenLayerRiverInit mlL = new GenLayerRiverInit(100L, mlK);
+//        Object mlM = new GenLayerBiome(200L, mlJ, worldType);
+//
+//        if (!flag)
+//        {
+//            GenLayer mlN = GenLayerZoom.magnify(1000L, (GenLayer) mlM, 2);
+//            mlM = new GenLayerBiomeEdge(1000L, mlN);
+//        }
+//
+//        GenLayer MlO = GenLayerZoom.magnify(1000L, mlL, 2);
+//        GenLayerHills mlP = new GenLayerHills(1000L, (GenLayer) mlM, MlO);
+//        mlK = GenLayerZoom.magnify(1000L, mlL, 2);
+//        mlK = GenLayerZoom.magnify(1000L, mlK, var5);
+//        GenLayerRiver mlQ = new GenLayerRiver(1L, mlK);
+//        GenLayerSmooth mlR = new GenLayerSmooth(1000L, mlQ);
+//        mlM = new GenLayerRareBiome(1001L, mlP);
+//
+//        for (int var9 = 0; var9 < var5; ++var9)
+//        {
+//            mlM = new GenLayerZoom((long) (1000 + var9), (GenLayer) mlM);
+//
+//            if (var9 == 0)
+//            {
+//                mlM = new GenLayerAddIsland(3L, (GenLayer) mlM);
+//            }
+//
+//            if (var9 == 1)
+//            {
+//                mlM = new GenLayerShore(1000L, (GenLayer) mlM);
+//            }
+//        }
+//
+//        GenLayerSmooth mlS = new GenLayerSmooth(1000L, (GenLayer) mlM);
+//        GenLayerRiverMix mlT = new GenLayerRiverMix(100L, mlS, mlR);
+//        GenLayerVoronoiZoom mlU = new GenLayerVoronoiZoom(10L, mlT);
+//        mlT.initWorldGenSeed(seed);
+//        mlU.initWorldGenSeed(seed);
+//        return new GenLayer[]
+//        {
+//            mlT, mlU, mlT
+//        };
+
     }
 
     public Layer(long seed)
@@ -264,11 +335,15 @@ public abstract class Layer
         this.baseSeed += seed;
     }
 
-    public void SetWorldSeed(long seed)
+    /**
+     * Initialize layer's local worldGenSeed based on its own baseSeed and the
+     * world's global seed (passed in as an argument).
+     */
+    public void initWorldGenSeed(long seed)
     {
         this.worldGenSeed = seed;
         if (this.child != null)
-            this.child.SetWorldSeed(seed);
+            this.child.initWorldGenSeed(seed);
         this.worldGenSeed *= (this.worldGenSeed * 6364136223846793005L + 1442695040888963407L);
         this.worldGenSeed += this.baseSeed;
         this.worldGenSeed *= (this.worldGenSeed * 6364136223846793005L + 1442695040888963407L);
@@ -277,7 +352,11 @@ public abstract class Layer
         this.worldGenSeed += this.baseSeed;
     }
 
-    protected void SetSeed(long x, long z)
+    /**
+     * Initialize layer's current chunkSeed based on the local worldGenSeed and
+     * the (x,z) chunk coordinates.
+     */
+    protected void initChunkSeed(long x, long z)
     {
         this.chunkSeed = this.worldGenSeed;
         this.chunkSeed *= (this.chunkSeed * 6364136223846793005L + 1442695040888963407L);
@@ -290,6 +369,9 @@ public abstract class Layer
         this.chunkSeed += z;
     }
 
+    /**
+     * returns a LCG pseudo random number from [0, x). Args: int x
+     */
     protected int nextInt(int x)
     {
         int i = (int) ((this.chunkSeed >> 24) % x);
@@ -308,40 +390,46 @@ public abstract class Layer
     public abstract int[] getInts(ArraysCache arraysCache, int x, int z, int xSize, int zSize);
 
     /*
-    //t>>	Add this function from MCP code when needed (Uses: GenLayerBiomeEdge, GenLayerHills)
-        protected static boolean compareBiomes(final int biome_A_ID, final int biome_B_ID);
-    //t>>	Add this function from MCP code when needed (Uses: GenLayerBiome, GenLayerShore)
-        protected static boolean isOcean(int biomeID);
-    */
-    
+     * //t>>	Add this function from MCP code when needed (Uses:
+     * GenLayerBiomeEdge, GenLayerHills)
+     * protected static boolean compareBiomes(final int biome_A_ID, final int
+     * biome_B_ID);
+     * //t>>	Add this function from MCP code when needed (Uses: GenLayerBiome,
+     * GenLayerShore)
+     * protected static boolean isOcean(int biomeID);
+     */
     //>>	Uses: GenLayer, GenLayerFuzzyZoom, GenLayerZoom
-    protected int getRandomInArray(int... biomes) {
+    protected int getRandomInArray(int... biomes)
+    {
         return biomes[this.nextInt(biomes.length)];
     }
-    
+
     protected int getRandomOf4(int a, int b, int c, int d)
     {
-        return b == c && c == d ? 
-                b :
-                (a == b && a == c ?
-                    a :
-                    (a == b && a == d ?
-                        a :
-                        (a == c && a == d ?
-                            a :
-                            (a == b && c != d ?
-                                a :
-                                (a == c && b != d ? 
-                                    a :
-                                    (a == d && b != c ?
-                                        a :
-                                        (b == c && a != d ?
-                                            b :
-                                            (b == d && a != c ?
-                                                b :
-                                                (c == d && a != b ?
-                                                    c :
-                                                    this.getRandomInArray(new int[]{a, b, c, d}))))))))));
+        return b == c && c == d
+               ? b
+               : (a == b && a == c
+                  ? a
+                  : (a == b && a == d
+                     ? a
+                     : (a == c && a == d
+                        ? a
+                        : (a == b && c != d
+                           ? a
+                           : (a == c && b != d
+                              ? a
+                              : (a == d && b != c
+                                 ? a
+                                 : (b == c && a != d
+                                    ? b
+                                    : (b == d && a != c
+                                       ? b
+                                       : (c == d && a != b
+                                          ? c
+                                          : this.getRandomInArray(new int[]
+                                          {
+                                              a, b, c, d
+        }))))))))));
     }
-    
+
 }

@@ -1,97 +1,116 @@
 package com.khorn.terraincontrol.generator.biome.layers;
 
-
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 
 public class LayerZoom extends Layer
 {
-    public LayerZoom(long paramLong, Layer paramGenLayer)
+
+    public LayerZoom(long seed, Layer childLayer)
     {
-        super(paramLong);
-        this.child = paramGenLayer;
+        super(seed);
+        this.child = childLayer;
     }
 
     @Override
-    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache arraysCache, int x, int z, int xSize, int zSize)
     {
-        int i = x >> 1;
-        int j = z >> 1;
-        int k = (x_size >> 1) + 3;
-        int m = (z_size >> 1) + 3;
-        int[] arrayOfInt1 = this.child.getInts(arraysCache, i, j, k, m);
 
-        int[] arrayOfInt2 = arraysCache.GetArray( k * 2 * (m * 2));
-        int n = k << 1;
-        int i2;
-        for (int i1 = 0; i1 < m - 1; i1++)
+        int x0 = x >> 1;
+        int z0 = z >> 1;
+        int xSize0 = (xSize >> 1) + 2;
+        int zSize0 = (zSize >> 1) + 2;
+
+        int[] childInts = this.child.getInts(arraysCache, x0, z0, xSize0, zSize0);
+        int xci = xSize0 - 1 << 1;
+        int zci = zSize0 - 1 << 1;
+        int[] thisInts = arraysCache.GetArray(xci * zci);
+        int ci; //>>	Cache index
+
+        for (int zi = 0; zi < zSize0 - 1; ++zi)
         {
-            i2 = i1 << 1;
-            int i3 = i2 * n;
-            int i4 = arrayOfInt1[((i1) * k)];
-            int i5 = arrayOfInt1[((i1 + 1) * k)];
-            for (int i6 = 0; i6 < k - 1; i6++)
+            ci = (zi << 1) * xci;
+            int i = 0;
+            int childValue = childInts[i + 0 + (zi + 0) * xSize0];
+
+            for (int xi = childInts[i + 0 + (zi + 1) * xSize0]; i < xSize0 - 1; ++i)
             {
-                SetSeed((long) (i6 + i << 1), (long) (i1 + j << 1));
-                int i7 = arrayOfInt1[(i6 + 1 + (i1) * k)];
-                int i8 = arrayOfInt1[(i6 + 1 + (i1 + 1) * k)];
-
-                arrayOfInt2[i3] = i4;
-                arrayOfInt2[i3++ + n] = RndParam(i4, i5);
-                arrayOfInt2[i3] = RndParam(i4, i7);
-                arrayOfInt2[i3++ + n] = b(i4, i7, i5, i8);
-
-                i4 = i7;
-                i5 = i8;
+                this.initChunkSeed((long) (i + x0 << 1), (long) (zi + z0 << 1));
+                int var18 = childInts[i + 1 + (zi + 0) * xSize0];
+                int var19 = childInts[i + 1 + (zi + 1) * xSize0];
+                thisInts[ci] = childValue;
+                thisInts[ci++ + xci] = this.getRandomInArray(new int[]
+                {
+                    childValue, xi
+                });
+                thisInts[ci] = this.getRandomInArray(new int[]
+                {
+                    childValue, var18
+                });
+                thisInts[ci++ + xci] = this.getRandomOf4(childValue, var18, xi, var19);
+                childValue = var18;
+                xi = var19;
             }
         }
-        int[] arrayOfInt3 = arraysCache.GetArray( x_size * z_size);
-        for (i2 = 0; i2 < z_size; i2++)
+
+        int[] ret = arraysCache.GetArray(xSize * zSize);
+
+        for (ci = 0; ci < zSize; ++ci)
         {
-            System.arraycopy(arrayOfInt2, (i2 + (z & 0x1)) * (k << 1) + (x & 0x1), arrayOfInt3, i2 * x_size, x_size);
+            System.arraycopy(thisInts, (ci + (z & 1)) * xci + (x & 1), ret, ci * xSize, xSize);
         }
-        return arrayOfInt3;
+
+        return ret;
+
+        //>>	OLD
+//        int x0 = x >> 1;
+//        int z0 = z >> 1;
+//        int xSize0 = (xSize >> 1) + 3;
+//        int zSize0 = (zSize >> 1) + 3;
+//        
+//        int[] childInts = this.child.getInts(arraysCache, x0, z0, xSize0, zSize0);
+//        int[] thisInts = arraysCache.GetArray( xSize0 * 2 * (zSize0 * 2));
+//        
+//        int n = xSize0 << 1;
+//        int i2;
+//        for (int i1 = 0; i1 < zSize0 - 1; i1++)
+//        {
+//            i2 = i1 << 1;
+//            int i3 = i2 * n;
+//            int i4 = childInts[((i1) * xSize0)];
+//            int i5 = childInts[((i1 + 1) * xSize0)];
+//            for (int i6 = 0; i6 < xSize0 - 1; i6++)
+//            {
+//                initChunkSeed((long) (i6 + x0 << 1), (long) (i1 + z0 << 1));
+//                int i7 = childInts[(i6 + 1 + (i1) * xSize0)];
+//                int i8 = childInts[(i6 + 1 + (i1 + 1) * xSize0)];
+//
+//                thisInts[i3] = i4;
+//                thisInts[i3++ + n] = RndParam(i4, i5);
+//                thisInts[i3] = RndParam(i4, i7);
+//                thisInts[i3++ + n] = this.getRandomOf4(i4, i7, i5, i8);
+//
+//                i4 = i7;
+//                i5 = i8;
+//            }
+//        }
+//        int[] arrayOfInt3 = arraysCache.GetArray( xSize * zSize);
+//        for (i2 = 0; i2 < zSize; i2++)
+//        {
+//            System.arraycopy(thisInts, (i2 + (z & 0x1)) * (xSize0 << 1) + (x & 0x1), arrayOfInt3, i2 * xSize, xSize);
+//        }
+//        return arrayOfInt3;
     }
 
-    protected int RndParam(int paramInt1, int paramInt2)
+    /**
+     * Magnify a layer. Parms are seed adjustment, layer, number of times to
+     * magnify
+     */
+    public static Layer magnify(long seedAdjust, Layer layer, int magnification)
     {
-        return nextInt(2) == 0 ? paramInt1 : paramInt2;
-    }
-
-    protected int b(int paramInt1, int paramInt2, int paramInt3, int paramInt4)
-    {
-        if ((paramInt2 == paramInt3) && (paramInt3 == paramInt4))
-            return paramInt2;
-        if ((paramInt1 == paramInt2) && (paramInt1 == paramInt3))
-            return paramInt1;
-        if ((paramInt1 == paramInt2) && (paramInt1 == paramInt4))
-            return paramInt1;
-        if ((paramInt1 == paramInt3) && (paramInt1 == paramInt4))
-            return paramInt1;
-
-        if ((paramInt1 == paramInt2) && (paramInt3 != paramInt4))
-            return paramInt1;
-        if ((paramInt1 == paramInt3) && (paramInt2 != paramInt4))
-            return paramInt1;
-        if ((paramInt1 == paramInt4) && (paramInt2 != paramInt3))
-            return paramInt1;
-
-        if ((paramInt2 == paramInt3) && (paramInt1 != paramInt4))
-            return paramInt2;
-        if ((paramInt2 == paramInt4) && (paramInt1 != paramInt3))
-            return paramInt2;
-
-        if ((paramInt3 == paramInt4) && (paramInt1 != paramInt2))
-            return paramInt3;
-
-
-        int i = nextInt(4);
-        if (i == 0)
-            return paramInt1;
-        if (i == 1)
-            return paramInt2;
-        if (i == 2)
-            return paramInt3;
-        return paramInt4;
+        Object baseLayer = layer;
+        for (int var5 = 0; var5 < magnification; ++var5)
+            baseLayer = new LayerZoom(seedAdjust + (long) var5, (Layer) baseLayer);
+        return (Layer) baseLayer;
     }
 
 }

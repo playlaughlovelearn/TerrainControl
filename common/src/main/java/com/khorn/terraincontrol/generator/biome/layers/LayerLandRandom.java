@@ -30,7 +30,7 @@ public class LayerLandRandom extends Layer
                 int i4 = arrayOfInt1[(i1 + 0 + (n + 2) * k)] & LandBit;
                 int i5 = arrayOfInt1[(i1 + 2 + (n + 2) * k)] & LandBit;
                 int i6 = arrayOfInt1[(i1 + 1 + (n + 1) * k)] & LandBit;
-                SetSeed(i1 + x, n + z);
+                initChunkSeed(i1 + x, n + z);
                 arrayOfInt2[(i1 + n * x_size)] = arrayOfInt1[(i1 + 1 + (n + 1) * k)] | LandBit;
                 if ((i6 == 0) && ((i2 != 0) || (i3 != 0) || (i4 != 0) || (i5 != 0)))
                 {

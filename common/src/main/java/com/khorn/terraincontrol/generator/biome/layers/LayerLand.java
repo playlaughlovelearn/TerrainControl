@@ -25,7 +25,7 @@ public class LayerLand extends Layer
         {
             for (int j = 0; j < x_size; j++)
             {
-                SetSeed(x + j, z + i);
+                initChunkSeed(x + j, z + i);
                 if (nextInt(chance) == 0)
                     arrayOfInt2[(j + i * x_size)] = arrayOfInt1[(j + i * x_size)] | LandBit;
                 else

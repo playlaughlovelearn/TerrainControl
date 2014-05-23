@@ -1,54 +1,67 @@
 package com.khorn.terraincontrol.generator.biome.layers;
 
-
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 
 public class LayerSmooth extends Layer
 {
-    public LayerSmooth(long paramLong, Layer paramGenLayer)
+
+    public LayerSmooth(long seed, Layer childLayer)
     {
-        super(paramLong);
-        this.child = paramGenLayer;
+        super(seed);
+        this.child = childLayer;
     }
 
     @Override
-    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache arraysCache, int x, int z, int xSize, int zSize)
     {
-        int i = x - 1;
-        int j = z - 1;
-        int k = x_size + 2;
-        int m = z_size + 2;
-        int[] arrayOfInt1 = this.child.getInts(arraysCache, i, j, k, m);
 
-        int[] arrayOfInt2 = arraysCache.GetArray( x_size * z_size);
-        for (int n = 0; n < z_size; n++)
+        int x0 = x - 1;
+        int z0 = z - 1;
+        int xSize0 = xSize + 2;
+        int zSize0 = zSize + 2;
+
+        int[] childInts = this.child.getInts(arraysCache, x0, z0, xSize0, zSize0);
+        int[] thisInts = arraysCache.GetArray(xSize * zSize);
+
+        for (int zi = 0; zi < zSize; ++zi)
         {
-            for (int i1 = 0; i1 < x_size; i1++)
+            for (int xi = 0; xi < xSize; ++xi)
             {
-                int i2 = arrayOfInt1[(i1 + 0 + (n + 1) * k)];
-                int i3 = arrayOfInt1[(i1 + 2 + (n + 1) * k)];
-                int i4 = arrayOfInt1[(i1 + 1 + (n) * k)];
-                int i5 = arrayOfInt1[(i1 + 1 + (n + 2) * k)];
-                int i6 = arrayOfInt1[(i1 + 1 + (n + 1) * k)];
-                if ((i2 == i3) && (i4 == i5))
+                int a = childInts[xi + 0 + (zi + 1) * xSize0];
+                int b = childInts[xi + 2 + (zi + 1) * xSize0];
+                int c = childInts[xi + 1 + (zi + 0) * xSize0];
+                int d = childInts[xi + 1 + (zi + 2) * xSize0];
+                int abcd = childInts[xi + 1 + (zi + 1) * xSize0];
+
+                if (a == b && c == d)
                 {
-                    SetSeed(i1 + x, n + z);
-                    if (nextInt(2) == 0)
-                        i6 = i2;
-                    else
-                        i6 = i4;
+                    this.initChunkSeed((long) (xi + x), (long) (zi + z));
+
+                    if (this.nextInt(2) == 0)
+                    {
+                        abcd = a;
+                    } else
+                    {
+                        abcd = c;
+                    }
                 } else
                 {
-                    if (i2 == i3)
-                        i6 = i2;
-                    if (i4 == i5)
-                        i6 = i4;
-                }
-                arrayOfInt2[(i1 + n * x_size)] = i6;
-            }
+                    if (a == b)
+                    {
+                        abcd = a;
+                    }
 
+                    if (c == d)
+                    {
+                        abcd = c;
+                    }
+                }
+
+                thisInts[xi + zi * xSize] = abcd;
+            }
         }
 
-        return arrayOfInt2;
+        return thisInts;
     }
+
 }

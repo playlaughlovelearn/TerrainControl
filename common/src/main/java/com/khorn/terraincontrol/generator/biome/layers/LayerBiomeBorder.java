@@ -41,7 +41,7 @@ public class LayerBiomeBorder extends Layer
         {
             for (int j = 0; j < x_size; j++)
             {
-                SetSeed(j + x, i + z);
+                initChunkSeed(j + x, i + z);
                 int currentPiece = arrayOfInt1[(j + 1 + (i + 1) * (x_size + 2))];
 
                 int biomeId = GetBiomeFromLayer(currentPiece);

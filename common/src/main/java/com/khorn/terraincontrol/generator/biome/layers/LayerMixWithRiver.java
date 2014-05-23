@@ -34,10 +34,10 @@ public class LayerMixWithRiver extends Layer
     private Layer riverLayer;
 
     @Override
-    public void SetWorldSeed(long seed)
+    public void initWorldGenSeed(long seed)
     {
-        super.SetWorldSeed(seed);
-        riverLayer.SetWorldSeed(seed + 31337);
+        super.initWorldGenSeed(seed);
+        riverLayer.initWorldGenSeed(seed + 31337);
     }
 
     @Override

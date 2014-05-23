@@ -25,7 +25,7 @@ public class LayerBiome extends Layer
         {
             for (int j = 0; j < x_size; j++)
             {
-                SetSeed(j + x, i + z);
+                initChunkSeed(j + x, i + z);
                 int currentPiece = arrayOfInt1[(j + i * x_size)];
 
 

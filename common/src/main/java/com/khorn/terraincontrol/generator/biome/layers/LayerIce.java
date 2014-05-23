@@ -25,7 +25,7 @@ public class LayerIce extends Layer
         {
             for (int j = 0; j < x_size; j++)
             {
-                SetSeed(z + i, x + j);      // reversed
+                initChunkSeed(z + i, x + j);      // reversed
                 arrayOfInt2[(j + i * x_size)] = (nextInt(rarity) == 0 ? (arrayOfInt1[(j + i * x_size)] | IceBit) : arrayOfInt1[(j + i * x_size)]);
             }
         }

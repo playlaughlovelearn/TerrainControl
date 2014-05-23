@@ -21,7 +21,7 @@ public class LayerRiverInit extends Layer
         {
             for (int j = 0; j < x_size; j++)
             {
-                SetSeed(i + z, j + x);           // reversed
+                initChunkSeed(i + z, j + x);           // reversed
                 int currentPiece = arrayOfInt1[(j + i * x_size)];
                 if (nextInt(2) == 0)
                     currentPiece |= RiverBitOne;
