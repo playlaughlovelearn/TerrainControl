@@ -32,7 +32,7 @@ public class LayerMix extends Layer
     private int[] riverBiomes;
 
     @Override
-    public int[] GetBiomes(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
         switch (arraysCache.outputType)
         {
@@ -50,7 +50,7 @@ public class LayerMix extends Layer
 
     private int[] GetFull(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
-        int[] arrayOfInt1 = this.child.GetBiomes(arraysCache, x, z, x_size, z_size);
+        int[] arrayOfInt1 = this.child.getInts(arraysCache, x, z, x_size, z_size);
         int[] arrayOfInt2 = arraysCache.GetArray(x_size * z_size);
         WorldConfig worldConfig = this.configs.worldConfig;
 
@@ -83,7 +83,7 @@ public class LayerMix extends Layer
 
     private int[] GetWithoutRivers(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
-        int[] arrayOfInt1 = this.child.GetBiomes(arraysCache, x, z, x_size, z_size);
+        int[] arrayOfInt1 = this.child.getInts(arraysCache, x, z, x_size, z_size);
         int[] arrayOfInt2 = arraysCache.GetArray(x_size * z_size);
         WorldConfig worldConfig = this.configs.worldConfig;
 
@@ -113,7 +113,7 @@ public class LayerMix extends Layer
 
     private int[] GetOnlyRivers(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
-        int[] arrayOfInt1 = this.child.GetBiomes(arraysCache, x, z, x_size, z_size);
+        int[] arrayOfInt1 = this.child.getInts(arraysCache, x, z, x_size, z_size);
         int[] arrayOfInt2 = arraysCache.GetArray(x_size * z_size);
         WorldConfig worldConfig = this.configs.worldConfig;
 

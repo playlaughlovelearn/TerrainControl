@@ -9,16 +9,16 @@ public class LayerBiome extends Layer
     public LocalBiome[] ice_biomes;
 
 
-    public LayerBiome(long paramLong, Layer paramGenLayer)
+    public LayerBiome(long seed, Layer childLayer/*, WorldType worldType*/)
     {
-        super(paramLong);
-        this.child = paramGenLayer;
+        super(seed);
+        this.child = childLayer;
     }
 
     @Override
-    public int[] GetBiomes(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
-        int[] arrayOfInt1 = this.child.GetBiomes(arraysCache, x, z, x_size, z_size);
+        int[] arrayOfInt1 = this.child.getInts(arraysCache, x, z, x_size, z_size);
 
         int[] arrayOfInt2 = arraysCache.GetArray(x_size * z_size);
         for (int i = 0; i < z_size; i++)

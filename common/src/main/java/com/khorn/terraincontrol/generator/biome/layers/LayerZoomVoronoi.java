@@ -12,7 +12,7 @@ public class LayerZoomVoronoi extends Layer
     }
 
     @Override
-    public int[] GetBiomes(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
         x -= 2;
         z -= 2;
@@ -22,7 +22,7 @@ public class LayerZoomVoronoi extends Layer
         int m = z >> i;
         int n = (x_size >> i) + 3;
         int i1 = (z_size >> i) + 3;
-        int[] arrayOfInt1 = this.child.GetBiomes(arraysCache, k, m, n, i1);
+        int[] arrayOfInt1 = this.child.getInts(arraysCache, k, m, n, i1);
 
         int i2 = n << i;
         int i3 = i1 << i;

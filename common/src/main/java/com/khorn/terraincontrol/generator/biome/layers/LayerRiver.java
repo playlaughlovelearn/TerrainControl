@@ -12,13 +12,13 @@ public class LayerRiver extends Layer
     }
 
     @Override
-    public int[] GetBiomes(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
         int i = x - 1;
         int j = z - 1;
         int k = x_size + 2;
         int m = z_size + 2;
-        int[] arrayOfInt1 = this.child.GetBiomes(arraysCache, i, j, k, m);
+        int[] arrayOfInt1 = this.child.getInts(arraysCache, i, j, k, m);
 
         int[] arrayOfInt2 = arraysCache.GetArray( x_size * z_size);
         for (int n = 0; n < z_size; n++)

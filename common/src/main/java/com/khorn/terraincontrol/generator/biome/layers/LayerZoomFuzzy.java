@@ -12,13 +12,13 @@ public class LayerZoomFuzzy extends Layer
     }
 
     @Override
-    public int[] GetBiomes(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
         int i = x >> 1;
         int j = z >> 1;
         int k = (x_size >> 1) + 3;
         int m = (z_size >> 1) + 3;
-        int[] arrayOfInt1 = this.child.GetBiomes(arraysCache, i, j, k, m);
+        int[] arrayOfInt1 = this.child.getInts(arraysCache, i, j, k, m);
 
         int[] arrayOfInt2 = arraysCache.GetArray(k * 2 * (m * 2));
         int n = k << 1;

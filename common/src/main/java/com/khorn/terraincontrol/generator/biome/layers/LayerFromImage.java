@@ -96,7 +96,7 @@ public class LayerFromImage extends Layer
         }
     }
     @Override
-    public int[] GetBiomes(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
         int[] resultBiomes = arraysCache.GetArray(x_size * z_size);
         
@@ -140,7 +140,7 @@ public class LayerFromImage extends Layer
         case ContinueNormal:
             int[] childBiomes = null;
             if (this.child != null)
-                childBiomes = this.child.GetBiomes(arraysCache, x, z, x_size, z_size);
+                childBiomes = this.child.getInts(arraysCache, x, z, x_size, z_size);
             for (int iz = 0; iz < z_size; iz++)
                 for (int ix = 0; ix < x_size; ix++)
                 {

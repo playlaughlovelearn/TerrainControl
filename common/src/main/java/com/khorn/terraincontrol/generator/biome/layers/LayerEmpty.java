@@ -11,7 +11,7 @@ public class LayerEmpty extends Layer
     }
 
     @Override
-    public int[] GetBiomes(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
         int[] arrayOfInt = arraysCache.GetArray( x_size * z_size);
         for (int i = 0; i < arrayOfInt.length; i++)

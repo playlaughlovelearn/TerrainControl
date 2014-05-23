@@ -14,10 +14,10 @@ import java.util.ArrayList;
 
 public abstract class Layer
 {
-    protected long b;
+    protected long worldGenSeed;
     protected Layer child;
-    private long c;
-    protected long d;
+    private long chunkSeed;
+    protected long baseSeed;
 
     /*
     LayerIsland - chance to big land
@@ -61,7 +61,7 @@ public abstract class Layer
         return 0;
     }
 
-    public static Layer[] Init(long paramLong, LocalWorld world)
+    public static Layer[] Init(long seed, LocalWorld world)
     {
 
         /*
@@ -76,7 +76,7 @@ public abstract class Layer
         LocalBiome[][] NormalBiomeMap = new LocalBiome[worldConfig.GenerationDepth + 1][];
         LocalBiome[][] IceBiomeMap = new LocalBiome[worldConfig.GenerationDepth + 1][];
 
-
+        //>>	>>START - How to handle this when biome groups are implemented? 
         for (int i = 0; i < worldConfig.GenerationDepth + 1; i++)
         {
             ArrayList<LocalBiome> normalBiomes = new ArrayList<LocalBiome>();
@@ -115,11 +115,10 @@ public abstract class Layer
                 IceBiomeMap[i] = iceBiomes.toArray(new LocalBiome[iceBiomes.size() + worldConfig.iceBiomesRarity]);
             else
                 IceBiomeMap[i] = new LocalBiome[0];
-
-
         }
+        //>>	>>END
 
-
+        //>>	Start of MCP function similarity GenLayer.initializeAllBomeGenerators on line 40
         Layer MainLayer = new LayerEmpty(1L);
 
         Layer RiverLayer = new LayerEmpty(1L);
@@ -246,7 +245,7 @@ public abstract class Layer
 
         //TemperatureLayer = new LayerTemperatureMix(TemperatureLayer, ZoomedLayer, 0, config);
 
-        ZoomedLayer.SetWorldSeed(paramLong);
+        ZoomedLayer.SetWorldSeed(seed);
 
         //MainLayer = new LayerCacheInit(1, MainLayer);
         //ZoomedLayer = new LayerCacheInit(1, ZoomedLayer);
@@ -254,53 +253,95 @@ public abstract class Layer
         return new Layer[]{MainLayer, ZoomedLayer};
     }
 
-    public Layer(long paramLong)
+    public Layer(long seed)
     {
-        this.d = paramLong;
-        this.d *= (this.d * 6364136223846793005L + 1442695040888963407L);
-        this.d += paramLong;
-        this.d *= (this.d * 6364136223846793005L + 1442695040888963407L);
-        this.d += paramLong;
-        this.d *= (this.d * 6364136223846793005L + 1442695040888963407L);
-        this.d += paramLong;
+        this.baseSeed = seed;
+        this.baseSeed *= (this.baseSeed * 6364136223846793005L + 1442695040888963407L);
+        this.baseSeed += seed;
+        this.baseSeed *= (this.baseSeed * 6364136223846793005L + 1442695040888963407L);
+        this.baseSeed += seed;
+        this.baseSeed *= (this.baseSeed * 6364136223846793005L + 1442695040888963407L);
+        this.baseSeed += seed;
     }
 
-    public void SetWorldSeed(long paramLong)
+    public void SetWorldSeed(long seed)
     {
-        this.b = paramLong;
+        this.worldGenSeed = seed;
         if (this.child != null)
-            this.child.SetWorldSeed(paramLong);
-        this.b *= (this.b * 6364136223846793005L + 1442695040888963407L);
-        this.b += this.d;
-        this.b *= (this.b * 6364136223846793005L + 1442695040888963407L);
-        this.b += this.d;
-        this.b *= (this.b * 6364136223846793005L + 1442695040888963407L);
-        this.b += this.d;
+            this.child.SetWorldSeed(seed);
+        this.worldGenSeed *= (this.worldGenSeed * 6364136223846793005L + 1442695040888963407L);
+        this.worldGenSeed += this.baseSeed;
+        this.worldGenSeed *= (this.worldGenSeed * 6364136223846793005L + 1442695040888963407L);
+        this.worldGenSeed += this.baseSeed;
+        this.worldGenSeed *= (this.worldGenSeed * 6364136223846793005L + 1442695040888963407L);
+        this.worldGenSeed += this.baseSeed;
     }
 
-    protected void SetSeed(long paramLong1, long paramLong2)
+    protected void SetSeed(long x, long z)
     {
-        this.c = this.b;
-        this.c *= (this.c * 6364136223846793005L + 1442695040888963407L);
-        this.c += paramLong1;
-        this.c *= (this.c * 6364136223846793005L + 1442695040888963407L);
-        this.c += paramLong2;
-        this.c *= (this.c * 6364136223846793005L + 1442695040888963407L);
-        this.c += paramLong1;
-        this.c *= (this.c * 6364136223846793005L + 1442695040888963407L);
-        this.c += paramLong2;
+        this.chunkSeed = this.worldGenSeed;
+        this.chunkSeed *= (this.chunkSeed * 6364136223846793005L + 1442695040888963407L);
+        this.chunkSeed += x;
+        this.chunkSeed *= (this.chunkSeed * 6364136223846793005L + 1442695040888963407L);
+        this.chunkSeed += z;
+        this.chunkSeed *= (this.chunkSeed * 6364136223846793005L + 1442695040888963407L);
+        this.chunkSeed += x;
+        this.chunkSeed *= (this.chunkSeed * 6364136223846793005L + 1442695040888963407L);
+        this.chunkSeed += z;
     }
 
-    protected int nextInt(int paramInt)
+    protected int nextInt(int x)
     {
-        int i = (int) ((this.c >> 24) % paramInt);
+        int i = (int) ((this.chunkSeed >> 24) % x);
         if (i < 0)
-            i += paramInt;
-        this.c *= (this.c * 6364136223846793005L + 1442695040888963407L);
-        this.c += this.b;
+            i += x;
+        this.chunkSeed *= (this.chunkSeed * 6364136223846793005L + 1442695040888963407L);
+        this.chunkSeed += this.worldGenSeed;
         return i;
     }
 
-    public abstract int[] GetBiomes(ArraysCache arraysCache, int x, int z, int x_size, int z_size);
+    /**
+     * Returns a list of integer values generated by this layer. These may be
+     * interpreted as temperatures, rainfall amounts, or biomeList[] indices
+     * based on the particular Layer subclass.
+     */
+    public abstract int[] getInts(ArraysCache arraysCache, int x, int z, int xSize, int zSize);
 
+    /*
+    //t>>	Add this function from MCP code when needed (Uses: GenLayerBiomeEdge, GenLayerHills)
+        protected static boolean compareBiomes(final int biome_A_ID, final int biome_B_ID);
+    //t>>	Add this function from MCP code when needed (Uses: GenLayerBiome, GenLayerShore)
+        protected static boolean isOcean(int biomeID);
+    */
+    
+    //>>	Uses: GenLayer, GenLayerFuzzyZoom, GenLayerZoom
+    protected int getRandomInArray(int... biomes) {
+        return biomes[this.nextInt(biomes.length)];
+    }
+    
+    protected int getRandomOf4(int a, int b, int c, int d)
+    {
+        return b == c && c == d ? 
+                b :
+                (a == b && a == c ?
+                    a :
+                    (a == b && a == d ?
+                        a :
+                        (a == c && a == d ?
+                            a :
+                            (a == b && c != d ?
+                                a :
+                                (a == c && b != d ? 
+                                    a :
+                                    (a == d && b != c ?
+                                        a :
+                                        (b == c && a != d ?
+                                            b :
+                                            (b == d && a != c ?
+                                                b :
+                                                (c == d && a != b ?
+                                                    c :
+                                                    this.getRandomInArray(new int[]{a, b, c, d}))))))))));
+    }
+    
 }
