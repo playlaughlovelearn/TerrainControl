@@ -69,9 +69,9 @@ public class OldBiomeGenerator extends BiomeGenerator
         }
 
         WorldConfig worldConfig = world.getSettings().worldConfig;
-        this.oldTemperature1 = this.temperatureGenerator1.generateOctaves(this.oldTemperature1, x, z, x_size, x_size, 0.025000000372529D / worldConfig.oldBiomeSize, 0.025000000372529D / worldConfig.oldBiomeSize, 0.25D);
-        this.oldWetness = this.wetnessGenerator.generateOctaves(this.oldWetness, x, z, x_size, x_size, 0.0500000007450581D / worldConfig.oldBiomeSize, 0.0500000007450581D / worldConfig.oldBiomeSize, 0.3333333333333333D);
-        this.oldTemperature2 = this.temperatureGenerator2.generateOctaves(this.oldTemperature2, x, z, x_size, x_size, 0.25D / worldConfig.oldBiomeSize, 0.25D / worldConfig.oldBiomeSize, 0.5882352941176471D);
+        this.oldTemperature1 = this.temperatureGenerator1.generate(this.oldTemperature1, x, z, x_size, x_size, 0.025000000372529D / worldConfig.oldBiomeSize, 0.025000000372529D / worldConfig.oldBiomeSize, 0.25D);
+        this.oldWetness = this.wetnessGenerator.generate(this.oldWetness, x, z, x_size, x_size, 0.0500000007450581D / worldConfig.oldBiomeSize, 0.0500000007450581D / worldConfig.oldBiomeSize, 0.3333333333333333D);
+        this.oldTemperature2 = this.temperatureGenerator2.generate(this.oldTemperature2, x, z, x_size, x_size, 0.25D / worldConfig.oldBiomeSize, 0.25D / worldConfig.oldBiomeSize, 0.5882352941176471D);
 
         int i = 0;
         for (int j = 0; j < x_size; j++)

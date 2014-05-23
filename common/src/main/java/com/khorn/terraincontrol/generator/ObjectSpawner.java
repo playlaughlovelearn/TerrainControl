@@ -89,7 +89,7 @@ public class ObjectSpawner
     
     protected void placeComplexSurfaceBlocks(ChunkCoordinate chunkCoord)
     {
-        this.reusableChunkNoiseArray = this.noiseGen.a(this.reusableChunkNoiseArray, chunkCoord.getChunkX() * 16, chunkCoord.getChunkZ() * 16, 16, 16, 0.0625D, 0.0625D, 1.0D);
+        this.reusableChunkNoiseArray = this.noiseGen.generate(this.reusableChunkNoiseArray, chunkCoord.getChunkX() * 16, chunkCoord.getChunkZ() * 16, 16, 16, 0.0625D, 0.0625D, 1.0D);
 
         int x = chunkCoord.getChunkX() * 16 + 8;
         int z = chunkCoord.getChunkZ() * 16 + 8;

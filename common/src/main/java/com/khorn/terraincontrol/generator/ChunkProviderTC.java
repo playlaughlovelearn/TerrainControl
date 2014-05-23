@@ -284,7 +284,7 @@ public class ChunkProviderTC
         int dryBlocksOnSurface = 256;
 
         final double d1 = 0.03125D;
-        this.noise4 = this.noiseGen4.a(this.noise4, chunkCoord.getBlockX(), chunkCoord.getBlockZ(), CHUNK_X_SIZE, CHUNK_Z_SIZE, d1 * 2.0D,
+        this.noise4 = this.noiseGen4.generate(this.noise4, chunkCoord.getBlockX(), chunkCoord.getBlockZ(), CHUNK_X_SIZE, CHUNK_Z_SIZE, d1 * 2.0D,
                 d1 * 2.0D, 1.0D);
 
         WorldConfig worldConfig = this.worldSettings.worldConfig;
@@ -412,15 +412,15 @@ public class ChunkProviderTC
 
         if (worldConfig.oldTerrainGenerator)
         {
-            this.noise5 = this.noiseGen5.Noise2D(this.noise5, xOffset, zOffset, NOISE_MAX_X, NOISE_MAX_Z, 1.121D, 1.121D);
+            this.noise5 = this.noiseGen5.generate2D(this.noise5, xOffset, zOffset, NOISE_MAX_X, NOISE_MAX_Z, 1.121D, 1.121D);
         }
-        this.noise6 = this.noiseGen6.Noise2D(this.noise6, xOffset, zOffset, NOISE_MAX_X, NOISE_MAX_Z, 200.0D, 200.0D);
+        this.noise6 = this.noiseGen6.generate2D(this.noise6, xOffset, zOffset, NOISE_MAX_X, NOISE_MAX_Z, 200.0D, 200.0D);
 
-        this.noise3 = this.noiseGen3.Noise3D(this.noise3, xOffset, yOffset, zOffset, NOISE_MAX_X, maxYSections, NOISE_MAX_Z,
+        this.noise3 = this.noiseGen3.generate3D(this.noise3, xOffset, yOffset, zOffset, NOISE_MAX_X, maxYSections, NOISE_MAX_Z,
                 xzScale / 80.0D, yScale / 160.0D, xzScale / 80.0D);
-        this.noise1 = this.noiseGen1.Noise3D(this.noise1, xOffset, yOffset, zOffset, NOISE_MAX_X, maxYSections, NOISE_MAX_Z, xzScale,
+        this.noise1 = this.noiseGen1.generate3D(this.noise1, xOffset, yOffset, zOffset, NOISE_MAX_X, maxYSections, NOISE_MAX_Z, xzScale,
                 yScale, xzScale);
-        this.noise2 = this.noiseGen2.Noise3D(this.noise2, xOffset, yOffset, zOffset, NOISE_MAX_X, maxYSections, NOISE_MAX_Z, xzScale,
+        this.noise2 = this.noiseGen2.generate3D(this.noise2, xOffset, yOffset, zOffset, NOISE_MAX_X, maxYSections, NOISE_MAX_Z, xzScale,
                 yScale, xzScale);
 
         int i3D = 0;

@@ -12,39 +12,39 @@ public class NoiseGeneratorOldOctaves
     {
         this.octaves = numOctaves;
         this.generatorCollection = new NoiseGeneratorOld[numOctaves];
-        for (int i = 0; i < numOctaves; i++)
+        for (int i = 0; i < numOctaves; ++i)
             this.generatorCollection[i] = new NoiseGeneratorOld(random);
     }
 
-    public double[] generateOctaves(double[] octaves, double Xin, double Yin, int Xmax, int Ymax, double Xscale, double Yscale, double someScaleValue)
+    public double[] generate(double[] noiseSpace, double xOffset, double zOffset, int xSize, int zSize, double xScale, double zScale, double octaveAmplitude)
     {
-        return generateOctaves(octaves, Xin, Yin, Xmax, Ymax, Xscale, Yscale, someScaleValue, 0.5D);
+        return generate(noiseSpace, xOffset, zOffset, xSize, zSize, xScale, zScale, octaveAmplitude, 0.5D);
     }
 
-    public double[] generateOctaves(double[] octaves, double Xin, double Yin, int Xmax, int Ymax, double Xscale, double Yscale, double someScaleValue, double someOtherScaleValue)
+    public double[] generate(double[] noiseSpace, double xOffset, double zOffset, int xSize, int zSize, double xScale, double zScale, double octaveAmplitude, double octaveOtherScaleValue)
     {
-        Xscale /= 1.5D;
-        Yscale /= 1.5D;
+        xScale /= 1.5D;
+        zScale /= 1.5D;
 
-        if ((octaves == null) || (octaves.length < Xmax * Ymax))
-            octaves = new double[Xmax * Ymax];
+        if ((noiseSpace == null) || (noiseSpace.length < xSize * zSize))
+            noiseSpace = new double[xSize * zSize];
         else
         {
-            for (int i = 0; i < octaves.length; i++)
+            for (int i = 0; i < noiseSpace.length; i++)
             {
-                octaves[i] = 0.0D;
+                noiseSpace[i] = 0.0D;
             }
         }
         double d1 = 1.0D;
         double d2 = 1.0D;
         for (int j = 0; j < this.octaves; j++)
         {
-            this.generatorCollection[j].noise(octaves, Xin, Yin, Xmax, Ymax, Xscale * d2, Yscale * d2, 0.55D / d1);
-            d2 *= someScaleValue;
-            d1 *= someOtherScaleValue;
+            this.generatorCollection[j].noise(noiseSpace, xOffset, zOffset, xSize, zSize, xScale * d2, zScale * d2, 0.55D / d1);
+            d2 *= octaveAmplitude;
+            d1 *= octaveOtherScaleValue;
         }
 
-        return octaves;
+        return noiseSpace;
     }
 
 }

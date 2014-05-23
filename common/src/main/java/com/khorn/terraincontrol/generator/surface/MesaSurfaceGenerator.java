@@ -70,7 +70,7 @@ public class MesaSurfaceGenerator implements SurfaceGenerator
 
     private byte getBlockData(int i, int j, int k)
     {
-        int l = (int) Math.round(this.noiseGenBlockData.a((double) i * 1.0D / 512.0D, (double) i * 1.0D / 512.0D) * 2.0D);
+        int l = (int) Math.round(this.noiseGenBlockData.generate((double) i * 1.0D / 512.0D, (double) i * 1.0D / 512.0D) * 2.0D);
 
         return this.blockDataValuesArray[(j + l + 64) % 64];
     }
@@ -189,12 +189,12 @@ public class MesaSurfaceGenerator implements SurfaceGenerator
                 this.noiseGenBryce2 = new NoiseGeneratorNewOctaves(newRandom, 1);
             }
 
-            double bryceNoiseValue = Math.min(Math.abs(noise), this.noiseGenBryce1.a(x * 0.25D, z * 0.25D));
+            double bryceNoiseValue = Math.min(Math.abs(noise), this.noiseGenBryce1.generate(x * 0.25D, z * 0.25D));
 
             if (bryceNoiseValue > 0.0D)
             {
                 double d3 = 0.001953125D;
-                double d4 = Math.abs(this.noiseGenBryce2.a(x * d3, z * d3));
+                double d4 = Math.abs(this.noiseGenBryce2.generate(x * d3, z * d3));
 
                 bryceHeight = bryceNoiseValue * bryceNoiseValue * 2.5D;
                 double d5 = Math.ceil(d4 * 50.0D) + 14.0D;

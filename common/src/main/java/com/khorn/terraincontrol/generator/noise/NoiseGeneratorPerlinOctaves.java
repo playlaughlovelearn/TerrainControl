@@ -7,91 +7,91 @@ import java.util.Random;
 public class NoiseGeneratorPerlinOctaves
 {
 
-    private NoiseGeneratorPerlin[] a;
-    private int b;
+    private NoiseGeneratorPerlin[] generatorCollection;
+    private int octaves;
 
-    public NoiseGeneratorPerlinOctaves(Random random, int i)
+    public NoiseGeneratorPerlinOctaves(Random random, int numOctaves)
     {
-        this.b = i;
-        this.a = new NoiseGeneratorPerlin[i];
+        this.octaves = numOctaves;
+        this.generatorCollection = new NoiseGeneratorPerlin[numOctaves];
 
-        for (int j = 0; j < i; ++j)
+        for (int i = 0; i < numOctaves; ++i)
         {
-            this.a[j] = new NoiseGeneratorPerlin(random);
+            this.generatorCollection[i] = new NoiseGeneratorPerlin(random);
         }
     }
 
-    public double[] Noise3D(double[] doubleArray, int xOffset, int yOffset, int zOffset, int xSize, int ySize, int zSize, double xScale, double yScale, double zScale)
+    public double[] generate3D(double[] noiseSpace, int xOffset, int yOffset, int zOffset, int xSize, int ySize, int zSize, double xScale, double yScale, double zScale)
     {
-        if (doubleArray == null)
+        if (noiseSpace == null)
         {
-            doubleArray = new double[xSize * ySize * zSize];
+            noiseSpace = new double[xSize * ySize * zSize];
         } else
         {
-            for (int k1 = 0; k1 < doubleArray.length; ++k1)
+            for (int i = 0; i < noiseSpace.length; ++i)
             {
-                doubleArray[k1] = 0.0D;
+                noiseSpace[i] = 0.0D;
             }
         }
 
-        double d3 = 1.0D;
+        double octaveFactor = 1.0D;
 
-        for (int l1 = 0; l1 < this.b; ++l1)
+        for (int i = 0; i < this.octaves; ++i)
         {
-            double d4 = (double) xOffset * d3 * xScale;
-            double d5 = (double) yOffset * d3 * yScale;
-            double d6 = (double) zOffset * d3 * zScale;
-            long i2 = MathHelper.floor_double_long(d4);
-            long j2 = MathHelper.floor_double_long(d6);
+            double xF = (double) xOffset * octaveFactor * xScale;
+            double yF = (double) yOffset * octaveFactor * yScale;
+            double zF = (double) zOffset * octaveFactor * zScale;
+            long xFfloor = MathHelper.floor_double_long(xF);
+            long zFfloor = MathHelper.floor_double_long(zF);
 
-            d4 -= (double) i2;
-            d6 -= (double) j2;
-            i2 %= 16777216L;
-            j2 %= 16777216L;
-            d4 += (double) i2;
-            d6 += (double) j2;
-            this.a[l1].populateNoiseArray3D(doubleArray, d4, d5, d6, xSize, ySize, zSize, xScale * d3, yScale * d3, zScale * d3, d3);
-            d3 /= 2.0D;
+            xF -= (double) xFfloor;
+            zF -= (double) zFfloor;
+            xFfloor %= 16777216L;
+            zFfloor %= 16777216L;
+            xF += (double) xFfloor;
+            zF += (double) zFfloor;
+            this.generatorCollection[i].noise3D(noiseSpace, xF, yF, zF, xSize, ySize, zSize, xScale * octaveFactor, yScale * octaveFactor, zScale * octaveFactor, octaveFactor);
+            octaveFactor /= 2.0D;
         }
 
-        return doubleArray;
+        return noiseSpace;
     }
 
 
-    public double[] Noise2D(double[] doubleArray, int xOffset, int zOffset, int xSize, int zSize, double xScale, double zScale)
+    public double[] generate2D(double[] noiseSpace, int xOffset, int zOffset, int xSize, int zSize, double xScale, double zScale)
     {
        // return this.Noise3D(doubleArray, xOffset, 10, zOffset, xSize, 1, zSize, xScale, 1.0D, zScale);
 
-        if (doubleArray == null)
+        if (noiseSpace == null)
         {
-            doubleArray = new double[xSize * zSize];
+            noiseSpace = new double[xSize * zSize];
         } else
         {
-            for (int k1 = 0; k1 < doubleArray.length; ++k1)
+            for (int i = 0; i < noiseSpace.length; ++i)
             {
-                doubleArray[k1] = 0.0D;
+                noiseSpace[i] = 0.0D;
             }
         }
 
-        double d3 = 1.0D;
+        double octaveAmplitude = 1.0D;
 
-        for (int l1 = 0; l1 < this.b; ++l1)
+        for (int i = 0; i < this.octaves; ++i)
         {
-            double d4 = (double) xOffset * d3 * xScale;
-            double d6 = (double) zOffset * d3 * zScale;
-            long i2 = MathHelper.floor_double_long(d4);
-            long j2 = MathHelper.floor_double_long(d6);
+            double xF = (double) xOffset * octaveAmplitude * xScale;
+            double zF = (double) zOffset * octaveAmplitude * zScale;
+            long xFfloor = MathHelper.floor_double_long(xF);
+            long zFfloor = MathHelper.floor_double_long(zF);
 
-            d4 -= (double) i2;
-            d6 -= (double) j2;
-            i2 %= 16777216L;
-            j2 %= 16777216L;
-            d4 += (double) i2;
-            d6 += (double) j2;
-            this.a[l1].populateNoiseArray2D(doubleArray, d4, d6, xSize, zSize, xScale * d3, zScale * d3, d3);
-            d3 /= 2.0D;
+            xF -= (double) xFfloor;
+            zF -= (double) zFfloor;
+            xFfloor %= 16777216L;
+            zFfloor %= 16777216L;
+            xF += (double) xFfloor;
+            zF += (double) zFfloor;
+            this.generatorCollection[i].noise2D(noiseSpace, xF, zF, xSize, zSize, xScale * octaveAmplitude, zScale * octaveAmplitude, octaveAmplitude);
+            octaveAmplitude /= 2.0D;
         }
 
-        return doubleArray;
+        return noiseSpace;
     }
 }

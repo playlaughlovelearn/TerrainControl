@@ -11,16 +11,16 @@ public class NoiseGeneratorOld extends NoiseGeneratorSimplex
     }
 
     @Override
-    public void noise(double[] noisePlane, double x, double y, int xmax, int ymax, double xscale, double yscale, double noiseRange)
+    public void noise(double[] noiseSpace, double xOffset, double zOffset, int xSize, int zSize, double xScale, double zScale, double octaveAmplitude)
     {
         int i = 0;
-        for (int xi = 0; xi < xmax; xi++)
+        for (int xi = 0; xi < xSize; xi++)
         {
-            double y0 = (y + (double) xi) * yscale + this.noiseContributionY;
-            for (int yi = 0; yi < ymax; yi++)
+            double z0 = (zOffset + (double) xi) * zScale + this.noiseContributionZ;
+            for (int zi = 0; zi < zSize; zi++)
             {
-                double x0 = (x + (double) yi) * xscale + this.noiseContributionX;
-                noisePlane[(i++)] += this.noise(x0, y0) * noiseRange;
+                double x0 = (xOffset + (double) zi) * xScale + this.noiseContributionX;
+                noiseSpace[(i++)] += this.noise(x0, z0) * octaveAmplitude;
             }
         }
     }
