@@ -65,9 +65,12 @@ import com.khorn.terraincontrol.configuration.standard.MinecraftBiomeTemplates.T
 import com.khorn.terraincontrol.configuration.standard.MinecraftBiomeTemplates.TaigaMountains;
 import com.khorn.terraincontrol.configuration.standard.*;
 import com.khorn.terraincontrol.logging.LogMarker;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Enumeration containing the Proper names and IDs of the default Minecraft biomes as well as some
+ * Enumeration containing the Proper names and IDs of the default Minecraft
+ * biomes as well as some
  * helper methods
  */
 public enum DefaultBiome
@@ -136,7 +139,7 @@ public enum DefaultBiome
     /**
      * Default ID, proper name and default settings class for a Mushroom Island Shore biome
      */
-    MUSHROOM_SHORE(15, "MushroomIslandShore", MushroomIslandShore.class),
+    MUSHROOM_ISLAND_SHORE(15, "MushroomIslandShore", MushroomIslandShore.class),
     /**
      * Default ID, proper name and default settings class for a Beach biome
      */
@@ -156,7 +159,7 @@ public enum DefaultBiome
     /**
      * Default ID, proper name and default settings class for an Extreme Hills Edge biome
      */
-    SMALL_MOUNTAINS(20, "Extreme Hills Edge", ExtremeHillsEdge.class),
+    EXTREME_HILLS_EDGE(20, "Extreme Hills Edge", ExtremeHillsEdge.class),
     /**
      * Default ID, proper name and default settings class for a Jungle biome
      */
@@ -185,6 +188,7 @@ public enum DefaultBiome
     MESA(37, "Mesa", Mesa.class),
     MESA_PLATEAU_FOREST(38, "Mesa Plateau F", MesaPlateauForest.class),
     MESA_PLATEAU(39, "Mesa Plateau", MesaPlateau.class),
+    
     SUNFLOWER_PLAINS(129, "Sunflower Plains", SunflowerPlains.class),
     DESERT_MOUNTAINS(130, "Desert M", DesertMountains.class),
     EXTREME_HILLS_MOUNTAINS(131, "Extreme Hills M", ExtremeHillsMountains.class),
@@ -235,6 +239,14 @@ public enum DefaultBiome
         this.defaultSettingsClass = defaultSettings;
     }
 
+    //t>>	This really shouldnt be here. Our Biome Definition method is VERY 
+    //t>>	inflexible at the moment. Need to refactor for easier maintanence 
+    //t>>	both our side and mc side considered. From BiomeGenBase class (MCP)
+    public boolean isSnowEnabled()
+    {
+        return true /* this.enableSnow */;
+    }
+
     static
     {
         // Declares and Defines the DefaultBiome lookup table
@@ -248,7 +260,7 @@ public enum DefaultBiome
 
     /**
      * Returns a DefaultBiome object with the given biome ID
-     * 
+     * <p>
      * @param id the ID of the DeafultBiome that is to be returned
      * @return A DefaultBiome with the given ID
      */
@@ -281,7 +293,7 @@ public enum DefaultBiome
 
     /**
      * Returns true or false depending on if this DefaultBiome has the given name
-     * 
+     * <p>
      * @param name The string to test this.Name against
      * @return Boolean whether or not this DefaultBiome has the given name
      */
@@ -296,7 +308,7 @@ public enum DefaultBiome
         }
         return false;
     }
-    
+
     /**
      * Returns the biome id depending on if this DefaultBiome has the
      * given name
@@ -316,5 +328,65 @@ public enum DefaultBiome
         }
         return null;
     }
+
+    public TempCategory getBiomeTemperatureCategory()
+    {
+        try
+        {
+            return this.defaultSettingsClass.newInstance().getBiomeTemperatureCategory();
+        } catch (InstantiationException ex)
+        {
+            Logger.getLogger(DefaultBiome.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex)
+        {
+            Logger.getLogger(DefaultBiome.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
     
+    //t>>	This really shouldnt be here. Our Biome Definition method is VERY 
+    //t>>	inflexible at the moment. Need to refactor for easier maintanence 
+    //t>>	both our side and mc side considered. From BiomeGenBase class (MCP)
+    public static class Height
+    {
+
+        public float base;
+        public float variance;
+
+        public Height(float base, float variance)
+        {
+            this.base = base;
+            this.variance = variance;
+        }
+
+        public DefaultBiome.Height getHeight()
+        {
+            return new DefaultBiome.Height(this.base * 0.8F, this.variance * 0.6F);
+        }
+
+    }
+
+    //t>>	This really shouldnt be here. Our Biome Definition method is VERY 
+    //t>>	inflexible at the moment. Need to refactor for easier maintanence 
+    //t>>	both our side and mc side considered. From BiomeGenBase class (MCP)
+    public static enum TempCategory
+    {
+
+        OCEAN("OCEAN", 0),
+        COLD("COLD", 1),
+        MEDIUM("MEDIUM", 2),
+        WARM("WARM", 3);
+
+        private static final DefaultBiome.TempCategory[] $VALUES = new DefaultBiome.TempCategory[]{
+            OCEAN, COLD, MEDIUM, WARM
+        };
+
+        private TempCategory(String name, int id)
+        {
+        }
+
+    }
+    
+    
+
 }

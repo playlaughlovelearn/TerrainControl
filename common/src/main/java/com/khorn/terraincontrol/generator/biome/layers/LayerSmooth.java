@@ -12,7 +12,7 @@ public class LayerSmooth extends Layer
     }
 
     @Override
-    public int[] getInts(ArraysCache arraysCache, int x, int z, int xSize, int zSize)
+    public int[] getInts(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
 
         int x0 = x - 1;
@@ -20,44 +20,44 @@ public class LayerSmooth extends Layer
         int xSize0 = xSize + 2;
         int zSize0 = zSize + 2;
 
-        int[] childInts = this.child.getInts(arraysCache, x0, z0, xSize0, zSize0);
-        int[] thisInts = arraysCache.GetArray(xSize * zSize);
+        int[] childInts = this.child.getInts(cache, x0, z0, xSize0, zSize0);
+        int[] thisInts = cache.getArray(xSize * zSize);
 
         for (int zi = 0; zi < zSize; ++zi)
         {
             for (int xi = 0; xi < xSize; ++xi)
             {
-                int a = childInts[xi + 0 + (zi + 1) * xSize0];
-                int b = childInts[xi + 2 + (zi + 1) * xSize0];
-                int c = childInts[xi + 1 + (zi + 0) * xSize0];
-                int d = childInts[xi + 1 + (zi + 2) * xSize0];
-                int abcd = childInts[xi + 1 + (zi + 1) * xSize0];
+                int northCheck = childInts[xi + 1 + (zi + 0) * xSize0];
+                int southCheck = childInts[xi + 1 + (zi + 2) * xSize0];
+                int eastCheck = childInts[xi + 2 + (zi + 1) * xSize0];
+                int westCheck = childInts[xi + 0 + (zi + 1) * xSize0];
+                int centerCheck = childInts[xi + 1 + (zi + 1) * xSize0];
 
-                if (a == b && c == d)
+                if (westCheck == eastCheck && northCheck == southCheck)
                 {
                     this.initChunkSeed((long) (xi + x), (long) (zi + z));
 
                     if (this.nextInt(2) == 0)
                     {
-                        abcd = a;
+                        centerCheck = westCheck;
                     } else
                     {
-                        abcd = c;
+                        centerCheck = northCheck;
                     }
                 } else
                 {
-                    if (a == b)
+                    if (westCheck == eastCheck)
                     {
-                        abcd = a;
+                        centerCheck = westCheck;
                     }
 
-                    if (c == d)
+                    if (northCheck == southCheck)
                     {
-                        abcd = c;
+                        centerCheck = northCheck;
                     }
                 }
 
-                thisInts[xi + zi * xSize] = abcd;
+                thisInts[xi + zi * xSize] = centerCheck;
             }
         }
 

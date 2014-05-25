@@ -12,56 +12,58 @@ public class LayerZoom extends Layer
     }
 
     @Override
-    public int[] getInts(ArraysCache arraysCache, int x, int z, int xSize, int zSize)
+    public int[] getInts(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-
         int x0 = x >> 1;
         int z0 = z >> 1;
         int xSize0 = (xSize >> 1) + 2;
         int zSize0 = (zSize >> 1) + 2;
 
-        int[] childInts = this.child.getInts(arraysCache, x0, z0, xSize0, zSize0);
+        int[] childInts = this.child.getInts(cache, x0, z0, xSize0, zSize0);
         int xci = xSize0 - 1 << 1;
         int zci = zSize0 - 1 << 1;
-        int[] thisInts = arraysCache.GetArray(xci * zci);
-        int ci; //>>	Cache index
+        int[] thisInts = cache.getArray(xci * zci);
+        int cbi; //>>	Cache base index
 
         for (int zi = 0; zi < zSize0 - 1; ++zi)
         {
-            ci = (zi << 1) * xci;
-            int i = 0;
-            int childValue = childInts[i + 0 + (zi + 0) * xSize0];
+            cbi = (zi << 1) * xci;
+            int xi0 = 0;
+            int childValue = childInts[xi0 + 0 + (zi + 0) * xSize0];
 
-            for (int xi = childInts[i + 0 + (zi + 1) * xSize0]; i < xSize0 - 1; ++i)
+            for (int xi = childInts[xi0 + 0 + (zi + 1) * xSize0]; xi0 < xSize0 - 1; ++xi0)
             {
-                this.initChunkSeed((long) (i + x0 << 1), (long) (zi + z0 << 1));
-                int var18 = childInts[i + 1 + (zi + 0) * xSize0];
-                int var19 = childInts[i + 1 + (zi + 1) * xSize0];
-                thisInts[ci] = childValue;
-                thisInts[ci++ + xci] = this.getRandomInArray(new int[]
+                this.initChunkSeed((long) (xi0 + x0 << 1), (long) (zi + z0 << 1));
+                int var18 = childInts[xi0 + 1 + (zi + 0) * xSize0];
+                int var19 = childInts[xi0 + 1 + (zi + 1) * xSize0];
+                thisInts[cbi] = childValue;
+                thisInts[cbi++ + xci] = this.getRandomInArray(new int[]
                 {
                     childValue, xi
                 });
-                thisInts[ci] = this.getRandomInArray(new int[]
+                thisInts[cbi] = this.getRandomInArray(new int[]
                 {
                     childValue, var18
                 });
-                thisInts[ci++ + xci] = this.getRandomOf4(childValue, var18, xi, var19);
+                thisInts[cbi++ + xci] = this.getRandomOf4(childValue, var18, xi, var19);
                 childValue = var18;
                 xi = var19;
             }
         }
 
-        int[] ret = arraysCache.GetArray(xSize * zSize);
+        int[] ret = cache.getArray(xSize * zSize);
 
-        for (ci = 0; ci < zSize; ++ci)
+        for (cbi = 0; cbi < zSize; ++cbi)
         {
-            System.arraycopy(thisInts, (ci + (z & 1)) * xci + (x & 1), ret, ci * xSize, xSize);
+            System.arraycopy(thisInts, (cbi + (z & 1)) * xci + (x & 1), ret, cbi * xSize, xSize);
         }
 
         return ret;
+    }
 
-        //>>	OLD
+//>>	OLD
+//    public int[] getInts(ArraysCache cache, int x, int z, int xSize, int zSize)
+//    {
 //        int x0 = x >> 1;
 //        int z0 = z >> 1;
 //        int xSize0 = (xSize >> 1) + 3;
@@ -99,8 +101,7 @@ public class LayerZoom extends Layer
 //            System.arraycopy(thisInts, (i2 + (z & 0x1)) * (xSize0 << 1) + (x & 0x1), arrayOfInt3, i2 * xSize, xSize);
 //        }
 //        return arrayOfInt3;
-    }
-
+//    }
     /**
      * Magnify a layer. Parms are seed adjustment, layer, number of times to
      * magnify
@@ -108,8 +109,8 @@ public class LayerZoom extends Layer
     public static Layer magnify(long seedAdjust, Layer layer, int magnification)
     {
         Object baseLayer = layer;
-        for (int var5 = 0; var5 < magnification; ++var5)
-            baseLayer = new LayerZoom(seedAdjust + (long) var5, (Layer) baseLayer);
+        for (int mi = 0; mi < magnification; ++mi)
+            baseLayer = new LayerZoom(seedAdjust + (long) mi, (Layer) baseLayer);
         return (Layer) baseLayer;
     }
 

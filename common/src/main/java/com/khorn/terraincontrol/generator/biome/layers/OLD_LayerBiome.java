@@ -3,13 +3,18 @@ package com.khorn.terraincontrol.generator.biome.layers;
 import com.khorn.terraincontrol.LocalBiome;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 
-public class LayerBiome extends Layer
+/**
+ * This class is kept here for reference during the BiomeGroups feature is
+ * implemented
+ */
+public class OLD_LayerBiome extends Layer
 {
+
     public LocalBiome[] biomes;
     public LocalBiome[] ice_biomes;
 
-
-    public LayerBiome(long seed, Layer childLayer/*, WorldType worldType*/)
+    public OLD_LayerBiome(long seed, Layer childLayer/* ,
+     * WorldType worldType */)
     {
         super(seed);
         this.child = childLayer;
@@ -20,7 +25,7 @@ public class LayerBiome extends Layer
     {
         int[] childInts = this.child.getInts(cache, x, z, xSize, zSize);
         int[] thisInts = cache.getArray(xSize * zSize);
-        
+
         for (int zi = 0; zi < zSize; zi++)
         {
             for (int xi = 0; xi < xSize; xi++)
@@ -45,10 +50,10 @@ public class LayerBiome extends Layer
 
                 thisInts[(xi + zi * xSize)] = selection;
 
-
             }
         }
 
         return thisInts;
     }
+
 }

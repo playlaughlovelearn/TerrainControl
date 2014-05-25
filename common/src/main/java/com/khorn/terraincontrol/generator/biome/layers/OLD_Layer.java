@@ -11,7 +11,11 @@ import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 
 import java.util.ArrayList;
 
-public abstract class Layer
+/**
+ * This class is kept here for reference during the BiomeGroups feature is
+ * implemented
+ */
+public abstract class OLD_Layer
 {
 
     protected long worldGenSeed;
@@ -245,7 +249,7 @@ public abstract class Layer
         };
     }
 
-    public Layer(long seed)
+    public OLD_Layer(long seed)
     {
         this.baseSeed = seed;
         this.baseSeed *= (this.baseSeed * 6364136223846793005L + 1442695040888963407L);
@@ -308,7 +312,7 @@ public abstract class Layer
      * interpreted as temperatures, rainfall amounts, or biomeList[] indices
      * based on the particular Layer subclass.
      */
-    public abstract int[] getInts(ArraysCache arraysCache, int x, int z, int xSize, int zSize);
+    public abstract int[] getInts(ArraysCache cache, int x, int z, int xSize, int zSize);
 
     protected static boolean compareBiomes(final int biome_A_ID, final int biome_B_ID)
     {
@@ -344,11 +348,13 @@ public abstract class Layer
         return biome_B_ID == DefaultBiome.MESA_PLATEAU_FOREST.Id || biome_B_ID == DefaultBiome.MESA_PLATEAU.Id;
     }
 
-    protected static boolean isOcean(int biomeID)
-    {
-        return biomeID == DefaultBiome.OCEAN.Id || biomeID == DefaultBiome.DEEP_OCEAN.Id || biomeID == DefaultBiome.FROZEN_OCEAN.Id;
-    }
-
+    /*
+     * //t>>	Add this function from MCP code when needed (Uses: GenLayerBiome,
+     * GenLayerShore)
+     * protected static boolean isOcean(int biomeID);
+     */
+    
+    //>>	Uses: GenLayer, GenLayerFuzzyZoom, GenLayerZoom
     protected int getRandomInArray(int... biomes)
     {
         return biomes[this.nextInt(biomes.length)];

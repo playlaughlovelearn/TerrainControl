@@ -9,159 +9,169 @@ import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 
 public class LayerMixWithRiver extends Layer
 {
-    public LayerMixWithRiver(long paramLong, Layer paramGenLayer, Layer riverLayer, WorldSettings configs, LocalWorld world)
+
+    private WorldSettings configs;
+    private int[] riverBiomes;
+    private Layer biomePatternGeneratorChain;
+    private Layer riverPatternGeneratorChain;
+
+    public LayerMixWithRiver(long seed, Layer childLayer, Layer riverLayer, WorldSettings configs, LocalWorld world)
     {
-        super(paramLong);
-        this.child = paramGenLayer;
+        super(seed);
+        //>>	This is how MCP code shows the river mix as opposed to using the child layer
+        this.child = childLayer;
+        this.biomePatternGeneratorChain = childLayer;
+        this.riverPatternGeneratorChain = riverLayer;
+        //>>	TC Specific Things
         this.configs = configs;
-        this.riverLayer = riverLayer;
         this.riverBiomes = new int[world.getMaxBiomesCount()];
 
         for (int id = 0; id < this.riverBiomes.length; id++)
         {
             LocalBiome biome = configs.biomes[id];
-
             if (biome == null || biome.getBiomeConfig().riverBiome.isEmpty())
+            {
                 this.riverBiomes[id] = -1;
-            else
+            } else
+            {
                 this.riverBiomes[id] = world.getBiomeByName(biome.getBiomeConfig().riverBiome).getIds().getGenerationId();
-
+            }
         }
     }
-
-    private WorldSettings configs;
-    private int[] riverBiomes;
-    private Layer riverLayer;
 
     @Override
     public void initWorldGenSeed(long seed)
     {
+        //>>	This is how MCP code shows the river mix as opposed to using the child layer
+        biomePatternGeneratorChain.initWorldGenSeed(seed/** / + 31337/**/);
+        riverPatternGeneratorChain.initWorldGenSeed(seed/** / + 31337/**/);
         super.initWorldGenSeed(seed);
-        riverLayer.initWorldGenSeed(seed + 31337);
     }
 
     @Override
-    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        switch (arraysCache.outputType)
+        switch (cache.outputType)
         {
             case FULL:
-                return this.GetFull(arraysCache, x, z, x_size, z_size);
+                return this.GetFull(cache, x, z, xSize, zSize);
             case WITHOUT_RIVERS:
-                return this.GetWithoutRivers(arraysCache, x, z, x_size, z_size);
+                return this.GetWithoutRivers(cache, x, z, xSize, zSize);
             case ONLY_RIVERS:
-                return this.GetOnlyRivers(arraysCache, x, z, x_size, z_size);
+                return this.GetOnlyRivers(cache, x, z, xSize, zSize);
             default:
-                throw new UnsupportedOperationException("Unknown/invalid output type: " + arraysCache.outputType);
+                throw new UnsupportedOperationException("Unknown/invalid output type: " + cache.outputType);
         }
     }
 
-    private int[] GetFull(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    private int[] GetFull(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        int[] arrayOfInt1 = this.child.getInts(arraysCache, x, z, x_size, z_size);
-        int[] arrayOfInt2 = this.riverLayer.getInts(arraysCache, x, z, x_size, z_size);
-        int[] arrayOfInt3 = arraysCache.GetArray(x_size * z_size);
+        int[] biomeInts = this.biomePatternGeneratorChain.getInts(cache, x, z, xSize, zSize);
+        int[] riverInts = this.riverPatternGeneratorChain.getInts(cache, x, z, xSize, zSize);
+        int[] thisInts = cache.getArray(xSize * zSize);
         WorldConfig worldConfig = this.configs.worldConfig;
 
-        int currentPiece;
-        int currentRiver;
-        int cachedId;
-        for (int i = 0; i < z_size; i++)
+        int selectionBiome;
+        int selectionRiver;
+        int preFinalBiome;
+        for (int zi = 0; zi < zSize; zi++)
         {
-            for (int j = 0; j < x_size; j++)
+            for (int xi = 0; xi < xSize; xi++)
             {
-                currentPiece = arrayOfInt1[(j + i * x_size)];
-                currentRiver = arrayOfInt2[(j + i * x_size)];
+                selectionBiome = biomeInts[(xi + zi * xSize)];
+                selectionRiver = riverInts[(xi + zi * xSize)];
 
-                if ((currentPiece & LandBit) != 0)
-                    cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
-                    cachedId = DefaultBiome.FROZEN_OCEAN.Id;
+                if ((selectionBiome & LandBit) != 0)
+                    preFinalBiome = selectionBiome & BiomeBits;
+                else if (worldConfig.FrozenOcean && (selectionBiome & IceBit) != 0)
+                    preFinalBiome = DefaultBiome.FROZEN_OCEAN.Id;
                 else
-                    cachedId = DefaultBiome.OCEAN.Id;
+                    preFinalBiome = DefaultBiome.OCEAN.Id;
 
-                if (worldConfig.riversEnabled && (currentRiver & RiverBits) != 0 && !this.configs.biomes[cachedId].getBiomeConfig().riverBiome.isEmpty())
-                    currentPiece = this.riverBiomes[cachedId];
+                if (worldConfig.riversEnabled && (selectionRiver & RiverBits) != 0 && !this.configs.biomes[preFinalBiome].getBiomeConfig().riverBiome.isEmpty())
+                    selectionBiome = this.riverBiomes[preFinalBiome];
                 else
-                    currentPiece = cachedId;
+                    selectionBiome = preFinalBiome;
 
-                arrayOfInt3[(j + i * x_size)] = currentPiece;
+                thisInts[(xi + zi * xSize)] = selectionBiome;
             }
         }
 
-        return arrayOfInt3;
+        return thisInts;
 
     }
 
-    private int[] GetWithoutRivers(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    private int[] GetWithoutRivers(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        int[] arrayOfInt1 = this.child.getInts(arraysCache, x, z, x_size, z_size);
-        //int[] arrayOfInt2 = this.riverLayer.GetBiomes(arraysCache, x, z, x_size, z_size);
-        int[] arrayOfInt3 = arraysCache.GetArray(x_size * z_size);
+        int[] biomeInts = this.biomePatternGeneratorChain.getInts(cache, x, z, xSize, zSize);
+        // int[] riverInts = this.riverPatternGeneratorChain.getInts(arraysCache, x, z, x_size, z_size);
+        int[] thisInts = cache.getArray(xSize * zSize);
         WorldConfig worldConfig = this.configs.worldConfig;
 
-        int currentPiece;
-        // int currentRiver;
-        int cachedId;
-        for (int i = 0; i < z_size; i++)
+        int selectionBiome;
+//        int selectionRiver;
+        int preFinalBiome;
+        for (int zi = 0; zi < zSize; zi++)
         {
-            for (int j = 0; j < x_size; j++)
+            for (int xi = 0; xi < xSize; xi++)
             {
-                currentPiece = arrayOfInt1[(j + i * x_size)];
-                // currentRiver = arrayOfInt2[(j + i * x_size)];
+                selectionBiome = biomeInts[(xi + zi * xSize)];
+//                 selectionRiver = riverInts[(j + i * x_size)];
 
-                if ((currentPiece & LandBit) != 0)
-                    cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
-                    cachedId = DefaultBiome.FROZEN_OCEAN.Id;
+                if ((selectionBiome & LandBit) != 0)
+                    preFinalBiome = selectionBiome & BiomeBits;
+                else if (worldConfig.FrozenOcean && (selectionBiome & IceBit) != 0)
+                    preFinalBiome = DefaultBiome.FROZEN_OCEAN.Id;
                 else
-                    cachedId = DefaultBiome.OCEAN.Id;
+                    preFinalBiome = DefaultBiome.OCEAN.Id;
 
-                /*if (this.worldConfig.riversEnabled && (currentRiver & RiverBits) != 0 && !this.worldConfig.biomeConfigs[cachedId].riverBiome.isEmpty())
-                    currentPiece = this.riverBiomes[cachedId];
-                else*/
-                currentPiece = cachedId;
+                /** /if (worldConfig.riversEnabled && (selectionRiver & RiverBits) != 0 && !worldConfig.biomeConfigs[cachedId].riverBiome.isEmpty())
+                   selectionBiome = this.riverBiomes[cachedId];
+                 else/* */
+                selectionBiome = preFinalBiome;
 
-                arrayOfInt3[(j + i * x_size)] = currentPiece;
+                thisInts[(xi + zi * xSize)] = selectionBiome;
             }
         }
 
-        return arrayOfInt3;
+        return thisInts;
     }
 
-    private int[] GetOnlyRivers(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    private int[] GetOnlyRivers(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        int[] arrayOfInt1 = this.child.getInts(arraysCache, x, z, x_size, z_size);
-        int[] arrayOfInt2 = this.riverLayer.getInts(arraysCache, x, z, x_size, z_size);
-        int[] arrayOfInt3 = arraysCache.GetArray(x_size * z_size);
+        int[] biomeInts = this.biomePatternGeneratorChain.getInts(cache, x, z, xSize, zSize);
+        int[] riverInts = this.riverPatternGeneratorChain.getInts(cache, x, z, xSize, zSize);
+        int[] thisInts = cache.getArray(xSize * zSize);
+
         WorldConfig worldConfig = this.configs.worldConfig;
 
-        int currentPiece;
-        int currentRiver;
-        int cachedId;
-        for (int i = 0; i < z_size; i++)
+        int selectionBiome;
+        int selectionRiver;
+        int preFinalBiome;
+        for (int zi = 0; zi < zSize; zi++)
         {
-            for (int j = 0; j < x_size; j++)
+            for (int xi = 0; xi < xSize; xi++)
             {
-                currentPiece = arrayOfInt1[(j + i * x_size)];
-                currentRiver = arrayOfInt2[(j + i * x_size)];
+                selectionBiome = biomeInts[(xi + zi * xSize)];
+                selectionRiver = riverInts[(xi + zi * xSize)];
 
-                if ((currentPiece & LandBit) != 0)
-                    cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
-                    cachedId = DefaultBiome.FROZEN_OCEAN.Id;
+                if ((selectionBiome & LandBit) != 0)
+                    preFinalBiome = selectionBiome & BiomeBits;
+                else if (worldConfig.FrozenOcean && (selectionBiome & IceBit) != 0)
+                    preFinalBiome = DefaultBiome.FROZEN_OCEAN.Id;
                 else
-                    cachedId = DefaultBiome.OCEAN.Id;
+                    preFinalBiome = DefaultBiome.OCEAN.Id;
 
-                if (worldConfig.riversEnabled && (currentRiver & RiverBits) != 0 && !this.configs.biomes[cachedId].getBiomeConfig().riverBiome.isEmpty())
-                    currentPiece = 1;
+                if (worldConfig.riversEnabled && (selectionRiver & RiverBits) != 0 && !this.configs.biomes[preFinalBiome].getBiomeConfig().riverBiome.isEmpty())
+                    selectionBiome = 1;
                 else
-                    currentPiece = 0;
+                    selectionBiome = 0;
 
-                arrayOfInt3[(j + i * x_size)] = currentPiece;
+                thisInts[(xi + zi * xSize)] = selectionBiome;
             }
         }
 
-        return arrayOfInt3;
+        return thisInts;
     }
+
 }

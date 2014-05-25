@@ -9,6 +9,7 @@ import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 
 public class LayerMix extends Layer
 {
+
     public LayerMix(long paramLong, Layer paramGenLayer, WorldSettings configs, LocalWorld world)
     {
         super(paramLong);
@@ -32,115 +33,116 @@ public class LayerMix extends Layer
     private int[] riverBiomes;
 
     @Override
-    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        switch (arraysCache.outputType)
+        switch (cache.outputType)
         {
             case FULL:
-                return this.GetFull(arraysCache, x, z, x_size, z_size);
+                return this.GetFull(cache, x, z, xSize, zSize);
             case WITHOUT_RIVERS:
-                return this.GetWithoutRivers(arraysCache, x, z, x_size, z_size);
+                return this.GetWithoutRivers(cache, x, z, xSize, zSize);
             case ONLY_RIVERS:
-                return this.GetOnlyRivers(arraysCache, x, z, x_size, z_size);
+                return this.GetOnlyRivers(cache, x, z, xSize, zSize);
             default:
-                throw new UnsupportedOperationException("Unknown/invalid output type: " + arraysCache.outputType);
+                throw new UnsupportedOperationException("Unknown/invalid output type: " + cache.outputType);
         }
 
     }
 
-    private int[] GetFull(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    private int[] GetFull(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        int[] arrayOfInt1 = this.child.getInts(arraysCache, x, z, x_size, z_size);
-        int[] arrayOfInt2 = arraysCache.GetArray(x_size * z_size);
+        int[] childInts = this.child.getInts(cache, x, z, xSize, zSize);
+        int[] thisInts = cache.getArray(xSize * zSize);
         WorldConfig worldConfig = this.configs.worldConfig;
 
-        int currentPiece;
-        int cachedId;
-        for (int i = 0; i < z_size; i++)
+        int selection;
+        int preFinalBiome;
+        for (int zi = 0; zi < zSize; zi++)
         {
-            for (int j = 0; j < x_size; j++)
+            for (int xi = 0; xi < xSize; xi++)
             {
-                currentPiece = arrayOfInt1[(j + i * x_size)];
+                selection = childInts[(xi + zi * xSize)];
 
-                if ((currentPiece & LandBit) != 0)
-                    cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
-                    cachedId = DefaultBiome.FROZEN_OCEAN.Id;
+                if ((selection & LandBit) != 0)
+                    preFinalBiome = selection & BiomeBits;
+                else if (worldConfig.FrozenOcean && (selection & IceBit) != 0)
+                    preFinalBiome = DefaultBiome.FROZEN_OCEAN.Id;
                 else
-                    cachedId = DefaultBiome.OCEAN.Id;
+                    preFinalBiome = DefaultBiome.OCEAN.Id;
 
-                if (worldConfig.riversEnabled && (currentPiece & RiverBits) != 0 && !this.configs.biomes[cachedId].getBiomeConfig().riverBiome.isEmpty())
-                    currentPiece = this.riverBiomes[cachedId];
+                if (worldConfig.riversEnabled && (selection & RiverBits) != 0 && !this.configs.biomes[preFinalBiome].getBiomeConfig().riverBiome.isEmpty())
+                    selection = this.riverBiomes[preFinalBiome];
                 else
-                    currentPiece = cachedId;
+                    selection = preFinalBiome;
 
-                arrayOfInt2[(j + i * x_size)] = currentPiece;
+                thisInts[(xi + zi * xSize)] = selection;
             }
         }
 
-        return arrayOfInt2;
+        return thisInts;
     }
 
-    private int[] GetWithoutRivers(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    private int[] GetWithoutRivers(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        int[] arrayOfInt1 = this.child.getInts(arraysCache, x, z, x_size, z_size);
-        int[] arrayOfInt2 = arraysCache.GetArray(x_size * z_size);
+        int[] childInts = this.child.getInts(cache, x, z, xSize, zSize);
+        int[] thisInts = cache.getArray(xSize * zSize);
         WorldConfig worldConfig = this.configs.worldConfig;
 
-        int currentPiece;
-        int cachedId;
-        for (int i = 0; i < z_size; i++)
+        int selection;
+        int preFinalBiome;
+        for (int zi = 0; zi < zSize; zi++)
         {
-            for (int j = 0; j < x_size; j++)
+            for (int xi = 0; xi < xSize; xi++)
             {
-                currentPiece = arrayOfInt1[(j + i * x_size)];
+                selection = childInts[(xi + zi * xSize)];
 
-                if ((currentPiece & LandBit) != 0)
-                    cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
-                    cachedId = DefaultBiome.FROZEN_OCEAN.Id;
+                if ((selection & LandBit) != 0)
+                    preFinalBiome = selection & BiomeBits;
+                else if (worldConfig.FrozenOcean && (selection & IceBit) != 0)
+                    preFinalBiome = DefaultBiome.FROZEN_OCEAN.Id;
                 else
-                    cachedId = DefaultBiome.OCEAN.Id;
+                    preFinalBiome = DefaultBiome.OCEAN.Id;
 
-                currentPiece = cachedId;
+                selection = preFinalBiome;
 
-                arrayOfInt2[(j + i * x_size)] = currentPiece;
+                thisInts[(xi + zi * xSize)] = selection;
             }
         }
 
-        return arrayOfInt2;
+        return thisInts;
     }
 
-    private int[] GetOnlyRivers(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    private int[] GetOnlyRivers(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        int[] arrayOfInt1 = this.child.getInts(arraysCache, x, z, x_size, z_size);
-        int[] arrayOfInt2 = arraysCache.GetArray(x_size * z_size);
+        int[] childInts = this.child.getInts(cache, x, z, xSize, zSize);
+        int[] thisInts = cache.getArray(xSize * zSize);
         WorldConfig worldConfig = this.configs.worldConfig;
 
-        int currentPiece;
-        int cachedId;
-        for (int i = 0; i < z_size; i++)
+        int selection;
+        int preFinalBiome;
+        for (int zi = 0; zi < zSize; zi++)
         {
-            for (int j = 0; j < x_size; j++)
+            for (int xi = 0; xi < xSize; xi++)
             {
-                currentPiece = arrayOfInt1[(j + i * x_size)];
+                selection = childInts[(xi + zi * xSize)];
 
-                if ((currentPiece & LandBit) != 0)
-                    cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
-                    cachedId = DefaultBiome.FROZEN_OCEAN.Id;
+                if ((selection & LandBit) != 0)
+                    preFinalBiome = selection & BiomeBits;
+                else if (worldConfig.FrozenOcean && (selection & IceBit) != 0)
+                    preFinalBiome = DefaultBiome.FROZEN_OCEAN.Id;
                 else
-                    cachedId = DefaultBiome.OCEAN.Id;
+                    preFinalBiome = DefaultBiome.OCEAN.Id;
 
-                if (worldConfig.riversEnabled && (currentPiece & RiverBits) != 0 && !this.configs.biomes[cachedId].getBiomeConfig().riverBiome.isEmpty())
-                    currentPiece = 1;
+                if (worldConfig.riversEnabled && (selection & RiverBits) != 0 && !this.configs.biomes[preFinalBiome].getBiomeConfig().riverBiome.isEmpty())
+                    selection = 1;
                 else
-                    currentPiece = 0;
+                    selection = 0;
 
-                arrayOfInt2[(j + i * x_size)] = currentPiece;
+                thisInts[(xi + zi * xSize)] = selection;
             }
         }
 
-        return arrayOfInt2;
+        return thisInts;
     }
+
 }

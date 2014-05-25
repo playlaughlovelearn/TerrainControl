@@ -76,6 +76,12 @@ public class StandardBiomeTemplate
         this.worldHeight = worldHeight;
     }
 
+    
+    public DefaultBiome.TempCategory getBiomeTemperatureCategory()
+    {
+        return (double) this.defaultBiomeTemperature < 0.2D ? DefaultBiome.TempCategory.COLD : ((double) this.defaultBiomeTemperature < 1.0D ? DefaultBiome.TempCategory.MEDIUM : DefaultBiome.TempCategory.WARM);
+    }
+    
     /**
      * Creates the default resources.
      * 

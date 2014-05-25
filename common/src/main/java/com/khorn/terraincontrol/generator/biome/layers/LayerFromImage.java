@@ -9,6 +9,7 @@ import com.khorn.terraincontrol.logging.LogMarker;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -23,10 +24,10 @@ public class LayerFromImage extends Layer
     private int zOffset;
     private WorldConfig.ImageMode imageMode;
 
-    public LayerFromImage(long paramLong, Layer child, WorldConfig config, LocalWorld world)
+    public LayerFromImage(long seed, Layer childLayer, WorldConfig config, LocalWorld world)
     {
-        super(paramLong);
-        this.child = child;
+        super(seed);
+        this.child = childLayer;
         xOffset = config.imageXOffset;
         zOffset = config.imageZOffset;
         this.imageMode = config.imageMode;
@@ -92,13 +93,13 @@ public class LayerFromImage extends Layer
                     this.biomeMap[nColor] = fillBiome;
             }
         } catch (IOException ioexception) {
-            TerrainControl.log(LogMarker.FATAL, ioexception.getStackTrace().toString());
+            TerrainControl.log(LogMarker.FATAL, Arrays.toString(ioexception.getStackTrace()));
         }
     }
     @Override
     public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
-        int[] resultBiomes = arraysCache.GetArray(x_size * z_size);
+        int[] resultBiomes = arraysCache.getArray(x_size * z_size);
         
         switch(this.imageMode)
         {

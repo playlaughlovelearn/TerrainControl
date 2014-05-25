@@ -27,7 +27,7 @@ public class ArraysCache
         outputType = OutputType.FULL;
     }
 
-    public int[] GetArray(int size)
+    public int[] getArray(int size)
     {
 
         if (size <= 256)

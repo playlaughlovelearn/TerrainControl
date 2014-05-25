@@ -15,6 +15,7 @@ import com.khorn.terraincontrol.util.minecraftTypes.TreeType;
  */
 public class MinecraftBiomeTemplates
 {
+
     public abstract static class MinecraftBiomeTemplate extends StandardBiomeTemplate
     {
         protected final MojangSettings mojangSettings;

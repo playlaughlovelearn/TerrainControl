@@ -1,13 +1,12 @@
 package com.khorn.terraincontrol.generator.biome.layers;
 
-
 import com.khorn.terraincontrol.LocalBiome;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 
-
 public class LayerBiomeBorder extends Layer
 {
+
     public LayerBiomeBorder(long paramLong, LocalWorld world)
     {
         super(paramLong);
@@ -18,50 +17,50 @@ public class LayerBiomeBorder extends Layer
     private boolean[][] BordersFrom;
     private int[] BordersTo;
 
-
-    public void AddBiome(LocalBiome replaceTo, int ReplaceFrom, LocalWorld world)
+    public void AddBiome(LocalBiome replaceTo, int replaceFrom, LocalWorld world)
     {
-        this.BordersFrom[ReplaceFrom] = new boolean[world.getMaxBiomesCount()];
+        this.BordersFrom[replaceFrom] = new boolean[world.getMaxBiomesCount()];
 
-        for (int i = 0; i < this.BordersFrom[ReplaceFrom].length; i++)
+        for (int i = 0; i < this.BordersFrom[replaceFrom].length; i++)
         {
             LocalBiome biome = world.getBiomeById(i);
-            this.BordersFrom[ReplaceFrom][i] = biome == null || !replaceTo.getBiomeConfig().notBorderNear.contains(biome.getName());
+            this.BordersFrom[replaceFrom][i] = biome == null || !replaceTo.getBiomeConfig().notBorderNear.contains(biome.getName());
         }
-        this.BordersTo[ReplaceFrom] = replaceTo.getIds().getGenerationId();
+        this.BordersTo[replaceFrom] = replaceTo.getIds().getGenerationId();
     }
 
     @Override
-    public int[] getInts(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] getInts(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        int[] arrayOfInt1 = this.child.getInts(arraysCache, x - 1, z - 1, x_size + 2, z_size + 2);
+        int[] childInts = this.child.getInts(cache, x - 1, z - 1, xSize + 2, zSize + 2);
 
-        int[] arrayOfInt2 = arraysCache.GetArray(x_size * z_size);
-        for (int i = 0; i < z_size; i++)
+        int[] thisInts = cache.getArray(xSize * zSize);
+        for (int zi = 0; zi < zSize; zi++)
         {
-            for (int j = 0; j < x_size; j++)
+            for (int xi = 0; xi < xSize; xi++)
             {
-                initChunkSeed(j + x, i + z);
-                int currentPiece = arrayOfInt1[(j + 1 + (i + 1) * (x_size + 2))];
+                initChunkSeed(xi + x, zi + z);
+                int selection = childInts[(xi + 1 + (zi + 1) * (xSize + 2))];
 
-                int biomeId = GetBiomeFromLayer(currentPiece);
+                int biomeId = GetBiomeFromLayer(selection);
                 if (BordersFrom[biomeId] != null)
                 {
-                    int i1 = GetBiomeFromLayer(arrayOfInt1[(j + 1 + (i + 1 - 1) * (x_size + 2))]);
-                    int i2 = GetBiomeFromLayer(arrayOfInt1[(j + 1 + 1 + (i + 1) * (x_size + 2))]);
-                    int i3 = GetBiomeFromLayer(arrayOfInt1[(j + 1 - 1 + (i + 1) * (x_size + 2))]);
-                    int i4 = GetBiomeFromLayer(arrayOfInt1[(j + 1 + (i + 1 + 1) * (x_size + 2))]);
+                    int i1 = GetBiomeFromLayer(childInts[(xi + 1 + (zi + 1 - 1) * (xSize + 2))]);
+                    int i2 = GetBiomeFromLayer(childInts[(xi + 1 + 1 + (zi + 1) * (xSize + 2))]);
+                    int i3 = GetBiomeFromLayer(childInts[(xi + 1 - 1 + (zi + 1) * (xSize + 2))]);
+                    int i4 = GetBiomeFromLayer(childInts[(xi + 1 + (zi + 1 + 1) * (xSize + 2))]);
                     boolean[] biomeFrom = BordersFrom[biomeId];
                     if (biomeFrom[i1] && biomeFrom[i2] && biomeFrom[i3] && biomeFrom[i4])
                         if ((i1 != biomeId) || (i2 != biomeId) || (i3 != biomeId) || (i4 != biomeId))
-                            currentPiece = (currentPiece & (IslandBit | RiverBits | IceBit)) | LandBit | BordersTo[biomeId];
+                            selection = (selection & (IslandBit | RiverBits | IceBit)) | LandBit | BordersTo[biomeId];
                 }
 
-                arrayOfInt2[(j + i * x_size)] = currentPiece;
+                thisInts[(xi + zi * xSize)] = selection;
 
             }
         }
 
-        return arrayOfInt2;
+        return thisInts;
     }
+
 }
