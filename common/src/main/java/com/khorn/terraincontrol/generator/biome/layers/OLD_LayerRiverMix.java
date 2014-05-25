@@ -7,7 +7,7 @@ import com.khorn.terraincontrol.configuration.WorldSettings;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 
-public class LayerMixWithRiver extends Layer
+public class OLD_LayerRiverMix extends Layer
 {
 
     private WorldSettings configs;
@@ -15,7 +15,7 @@ public class LayerMixWithRiver extends Layer
     private Layer biomePatternGeneratorChain;
     private Layer riverPatternGeneratorChain;
 
-    public LayerMixWithRiver(long seed, Layer childLayer, Layer riverLayer, WorldSettings configs, LocalWorld world)
+    public OLD_LayerRiverMix(long seed, Layer childLayer, Layer riverLayer, WorldSettings configs, LocalWorld world)
     {
         super(seed);
         //>>	This is how MCP code shows the river mix as opposed to using the child layer

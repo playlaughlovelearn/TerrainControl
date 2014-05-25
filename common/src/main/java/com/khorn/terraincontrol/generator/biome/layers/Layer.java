@@ -2,7 +2,6 @@ package com.khorn.terraincontrol.generator.biome.layers;
 
 import com.khorn.terraincontrol.LocalBiome;
 import com.khorn.terraincontrol.LocalWorld;
-import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.configuration.BiomeConfig;
 import com.khorn.terraincontrol.configuration.WorldConfig;
 import com.khorn.terraincontrol.configuration.WorldSettings;
@@ -14,9 +13,25 @@ import java.util.ArrayList;
 public abstract class Layer
 {
 
+    /**
+     * seed from World#getWorldSeed that is used in the LCG prng
+     */
     protected long worldGenSeed;
+
+    /**
+     * child Layer that was provided via the constructor
+     */
     protected Layer child;
+
+    /**
+     * final part of the LCG prng that uses the chunk X, Z coords along with the
+     * other two seeds to generate pseudorandom numbers
+     */
     private long chunkSeed;
+
+    /**
+     * base seed to the LCG prng provided via the constructor
+     */
     protected long baseSeed;
 
     /*
@@ -62,186 +77,79 @@ public abstract class Layer
 
     public static Layer[] Init(long seed, LocalWorld world)
     {
+        boolean flag = false;
+        LayerIsland MainLayer = new LayerIsland(1L);
+        LayerZoomFuzzy mlA = new LayerZoomFuzzy(2000L, MainLayer);
+        LayerAddIsland mlB = new LayerAddIsland(1L, mlA);
+        LayerZoom mlC = new LayerZoom(2001L, mlB);
+        mlB = new LayerAddIsland(2L, mlC);
+        mlB = new LayerAddIsland(50L, mlB);
+        mlB = new LayerAddIsland(70L, mlB);
+        LayerRemoveTooMuchOcean mlD = new LayerRemoveTooMuchOcean(2L, mlB);
+        LayerAddSnow mlE = new LayerAddSnow(2L, mlD);
+        mlB = new LayerAddIsland(3L, mlE);
+        LayerEdge mlF = new LayerEdge(2L, mlB, LayerEdge.Mode.COOL_WARM);
+        mlF = new LayerEdge(2L, mlF, LayerEdge.Mode.HEAT_ICE);
+        mlF = new LayerEdge(3L, mlF, LayerEdge.Mode.SPECIAL);
+        mlC = new LayerZoom(2002L, mlF);
+        mlC = new LayerZoom(2003L, mlC);
+        mlB = new LayerAddIsland(4L, mlC);
+        LayerAddMushroomIsland mlG = new LayerAddMushroomIsland(5L, mlB);
+        LayerDeepOcean mlH = new LayerDeepOcean(4L, mlG);
+        Layer mlJ = LayerZoom.magnify(1000L, mlH, 0);
+        byte var5 = 4;
 
-        /*
-         * int BigLandSize = 2; //default 0, more - smaller
-         * int ChanceToIncreaseLand = 6; //default 4
-         * int MaxDepth = 10;
-         */
-        WorldSettings configs = world.getSettings();
-        WorldConfig worldConfig = configs.worldConfig;
-
-        LocalBiome[][] NormalBiomeMap = new LocalBiome[worldConfig.GenerationDepth + 1][];
-        LocalBiome[][] IceBiomeMap = new LocalBiome[worldConfig.GenerationDepth + 1][];
-
-        //>>	>>START - How to handle this when biome groups are implemented? 
-        for (int i = 0; i < worldConfig.GenerationDepth + 1; i++)
+//        if (worldType == WorldType.LARGE_BIOMES) {
+//            var5 = 6;
+//        }
+        if (flag)
         {
-            ArrayList<LocalBiome> normalBiomes = new ArrayList<LocalBiome>();
-            ArrayList<LocalBiome> iceBiomes = new ArrayList<LocalBiome>();
-            for (LocalBiome biome : configs.biomes)
-            {
-                if (biome == null)
-                    continue;
-
-                BiomeConfig biomeConfig = biome.getBiomeConfig();
-
-                if (biomeConfig.biomeSize != i)
-                    continue;
-                if (worldConfig.NormalBiomes.contains(biomeConfig.name))
-                {
-                    for (int t = 0; t < biomeConfig.biomeRarity; t++)
-                        normalBiomes.add(biome);
-                    worldConfig.normalBiomesRarity -= biomeConfig.biomeRarity;
-                }
-
-                if (worldConfig.IceBiomes.contains(biomeConfig.name))
-                {
-                    for (int t = 0; t < biomeConfig.biomeRarity; t++)
-                        iceBiomes.add(biome);
-                    worldConfig.iceBiomesRarity -= biomeConfig.biomeRarity;
-                }
-
-            }
-
-            if (!normalBiomes.isEmpty())
-                NormalBiomeMap[i] = normalBiomes.toArray(new LocalBiome[normalBiomes.size() + worldConfig.normalBiomesRarity]);
-            else
-                NormalBiomeMap[i] = new LocalBiome[0];
-
-            if (!iceBiomes.isEmpty())
-                IceBiomeMap[i] = iceBiomes.toArray(new LocalBiome[iceBiomes.size() + worldConfig.iceBiomesRarity]);
-            else
-                IceBiomeMap[i] = new LocalBiome[0];
-        }
-        //>>	>>END
-
-        //>>	Start of MCP function similarity GenLayer.initializeAllBomeGenerators on line 40
-        Layer MainLayer = new LayerEmpty(1L);
-
-        Layer RiverLayer = new LayerEmpty(1L);
-        boolean riversStarted = false;
-
-        for (int depth = 0; depth <= worldConfig.GenerationDepth; depth++)
-        {
-
-            MainLayer = new LayerZoom(2001 + depth, MainLayer);
-
-            if (worldConfig.randomRivers && riversStarted)
-                RiverLayer = new LayerZoom(2001 + depth, RiverLayer);
-
-            if (worldConfig.LandSize == depth)
-            {
-                MainLayer = new LayerLand(1L, MainLayer, worldConfig.LandRarity);
-                MainLayer = new LayerZoomFuzzy(2000L, MainLayer);
-            }
-
-            if (depth < (worldConfig.LandSize + worldConfig.LandFuzzy))
-                MainLayer = new LayerLandRandom(depth, MainLayer);
-
-            if (NormalBiomeMap[depth].length != 0 || IceBiomeMap[depth].length != 0)
-            {
-
-                LayerBiome layerBiome = new LayerBiome(200, MainLayer);
-                layerBiome.biomes = NormalBiomeMap[depth];
-                layerBiome.ice_biomes = IceBiomeMap[depth];
-                MainLayer = layerBiome;
-            }
-
-            if (worldConfig.IceSize == depth)
-                MainLayer = new LayerIce(depth, MainLayer, worldConfig.IceRarity);
-
-            if (worldConfig.riverRarity == depth)
-                if (worldConfig.randomRivers)
-                {
-                    RiverLayer = new LayerRiverInit(155, RiverLayer);
-                    riversStarted = true;
-                } else
-                    MainLayer = new LayerRiverInit(155, MainLayer);
-
-            if ((worldConfig.GenerationDepth - worldConfig.riverSize) == depth)
-            {
-                if (worldConfig.randomRivers)
-                    RiverLayer = new LayerRiver(5 + depth, RiverLayer);
-                else
-                    MainLayer = new LayerRiver(5 + depth, MainLayer);
-            }
-
-            LayerBiomeBorder layerBiomeBorder = new LayerBiomeBorder(3000 + depth, world);
-            boolean haveBorder = false;
-            for (LocalBiome biome : configs.biomes)
-            {
-                if (biome == null)
-                    continue;
-                BiomeConfig biomeConfig = biome.getBiomeConfig();
-                if (biomeConfig.biomeSize != depth)
-                    continue;
-                if (worldConfig.IsleBiomes.contains(biomeConfig.name) && biomeConfig.isleInBiome != null)
-                {
-                    int id = biome.getIds().getGenerationId();
-
-                    LayerBiomeInBiome layerBiome = new LayerBiomeInBiome(4000 + id, MainLayer);
-                    layerBiome.biome = biome;
-                    for (String islandInName : biomeConfig.isleInBiome)
-                    {
-                        int islandIn = world.getBiomeByName(islandInName).getIds().getGenerationId();
-                        if (islandIn == DefaultBiome.OCEAN.Id)
-                            layerBiome.inOcean = true;
-                        else
-                            layerBiome.BiomeIsles[islandIn] = true;
-                    }
-
-                    layerBiome.chance = (worldConfig.BiomeRarityScale + 1) - biomeConfig.biomeRarity;
-                    MainLayer = layerBiome;
-                }
-
-                if (worldConfig.BorderBiomes.contains(biomeConfig.name) && biomeConfig.biomeIsBorder != null)
-                {
-                    haveBorder = true;
-
-                    for (String replaceFromName : biomeConfig.biomeIsBorder)
-                    {
-                        int replaceFrom = world.getBiomeByName(replaceFromName).getIds().getGenerationId();
-                        layerBiomeBorder.AddBiome(biome, replaceFrom, world);
-
-                    }
-
-                }
-            }
-
-            if (haveBorder)
-            {
-                layerBiomeBorder.child = MainLayer;
-                MainLayer = layerBiomeBorder;
-            }
-
-        }
-        if (worldConfig.randomRivers)
-            MainLayer = new LayerMixWithRiver(1L, MainLayer, RiverLayer, configs, world);
-        else
-            MainLayer = new LayerMix(1L, MainLayer, configs, world);
-
-        MainLayer = new LayerSmooth(400L, MainLayer);
-
-        if (worldConfig.biomeMode == TerrainControl.getBiomeModeManager().FROM_IMAGE)
-        {
-
-            if (worldConfig.imageMode == WorldConfig.ImageMode.ContinueNormal)
-                MainLayer = new LayerFromImage(1L, MainLayer, worldConfig, world);
-            else
-                MainLayer = new LayerFromImage(1L, null, worldConfig, world);
+            var5 = 4;
         }
 
-        Layer ZoomedLayer = new LayerZoomVoronoi(10L, MainLayer);
+        Layer mlK = LayerZoom.magnify(1000L, mlJ, 0);
+        LayerRiverInit mlL = new LayerRiverInit(100L, mlK);
+        Object mlM = new LayerBiome(200L, mlJ/** /,
+         * worldType/* */
+        );
 
-        //TemperatureLayer = new LayerTemperatureMix(TemperatureLayer, ZoomedLayer, 0, config);
-        ZoomedLayer.initWorldGenSeed(seed);
+        if (!flag)
+        {
+            Layer mlN = LayerZoom.magnify(1000L, (Layer) mlM, 2);
+            mlM = new LayerBiomeEdge(1000L, mlN);
+        }
 
-        //MainLayer = new LayerCacheInit(1, MainLayer);
-        //ZoomedLayer = new LayerCacheInit(1, ZoomedLayer);
+        Layer MlO = LayerZoom.magnify(1000L, mlL, 2);
+        LayerHills mlP = new LayerHills(1000L, (Layer) mlM, MlO);
+        mlK = LayerZoom.magnify(1000L, mlL, 2);
+        mlK = LayerZoom.magnify(1000L, mlK, var5);
+        LayerRiver mlQ = new LayerRiver(1L, mlK);
+        LayerSmooth mlR = new LayerSmooth(1000L, mlQ);
+        mlM = new LayerRareBiome(1001L, mlP);
+
+        for (int var9 = 0; var9 < var5; ++var9)
+        {
+            mlM = new LayerZoom((long) (1000 + var9), (Layer) mlM);
+
+            if (var9 == 0)
+            {
+                mlM = new LayerAddIsland(3L, (Layer) mlM);
+            }
+
+            if (var9 == 1)
+            {
+                mlM = new LayerShore(1000L, (Layer) mlM);
+            }
+        }
+
+        LayerSmooth mlS = new LayerSmooth(1000L, (Layer) mlM);
+        LayerRiverMix mlT = new LayerRiverMix(100L, mlS, mlR);
+        LayerZoomVoronoi mlU = new LayerZoomVoronoi(10L, mlT);
+        mlT.initWorldGenSeed(seed);
+        mlU.initWorldGenSeed(seed);
         return new Layer[]
         {
-            MainLayer, ZoomedLayer
+            mlT, mlU, mlT
         };
     }
 
@@ -322,23 +230,30 @@ public abstract class Layer
                 return DefaultBiome.getBiome(biome_A_ID) != null && DefaultBiome.getBiome(biome_B_ID) != null ? DefaultBiome.getBiome(biome_A_ID).equals(DefaultBiome.getBiome(biome_B_ID)) : false;
             } catch (Throwable ex)
             {
-            /**  //t>>	Is there any need, or even a way, to hook into this CR system?
-             *   CrashReport cr = CrashReport.makeCrashReport(ex, "Comparing biomes");
-             *   CrashReportCategory crc = cr.makeCategory("Biomes being compared");
-             *   crc.addCrashSection("Biome A ID", Integer.valueOf(biome_A_ID));
-             *   crc.addCrashSection("Biome B ID", Integer.valueOf(biome_B_ID));
-             *   crc.addCrashSectionCallable("Biome A", new Callable() {
-             *       public String call() {
-             *           return String.valueOf(DefaultBiome.getBiomeGenerator(biome_A_ID));
-             *       }
-             *   });
-             *   crc.addCrashSectionCallable("Biome B", new Callable() {
-             *       public String call() {
-             *           return String.valueOf(DefaultBiome.getBiomeGenerator(biome_B_ID));
-             *       }
-             *   });
-             *   throw new ReportedException(cr);
-             */
+                /** //t>>	Is there any need, or even a way, to hook into this CR
+                 * system?
+                 * CrashReport cr = CrashReport.makeCrashReport(ex, "Comparing
+                 * biomes");
+                 * CrashReportCategory crc = cr.makeCategory("Biomes being
+                 * compared");
+                 * crc.addCrashSection("Biome A ID",
+                 * Integer.valueOf(biome_A_ID));
+                 * crc.addCrashSection("Biome B ID",
+                 * Integer.valueOf(biome_B_ID));
+                 * crc.addCrashSectionCallable("Biome A", new Callable() {
+                 * public String call() {
+                 * return
+                 * String.valueOf(DefaultBiome.getBiomeGenerator(biome_A_ID));
+                 * }
+                 * });
+                 * crc.addCrashSectionCallable("Biome B", new Callable() {
+                 * public String call() {
+                 * return
+                 * String.valueOf(DefaultBiome.getBiomeGenerator(biome_B_ID));
+                 * }
+                 * });
+                 * throw new ReportedException(cr);
+                 */
             }
         }
         return biome_B_ID == DefaultBiome.MESA_PLATEAU_FOREST.Id || biome_B_ID == DefaultBiome.MESA_PLATEAU.Id;

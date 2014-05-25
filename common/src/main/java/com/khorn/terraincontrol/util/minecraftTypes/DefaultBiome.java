@@ -329,19 +329,12 @@ public enum DefaultBiome
         return null;
     }
 
+    //t>>	This really shouldnt be here. Our Biome Definition method is VERY 
+    //t>>	inflexible at the moment. Need to refactor for easier maintanence 
+    //t>>	both our side and mc side considered. From BiomeGenBase class (MCP)
     public TempCategory getBiomeTemperatureCategory()
     {
-        try
-        {
-            return this.defaultSettingsClass.newInstance().getBiomeTemperatureCategory();
-        } catch (InstantiationException ex)
-        {
-            Logger.getLogger(DefaultBiome.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex)
-        {
-            Logger.getLogger(DefaultBiome.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+        return TempCategory.MEDIUM;
     }
     
     //t>>	This really shouldnt be here. Our Biome Definition method is VERY 

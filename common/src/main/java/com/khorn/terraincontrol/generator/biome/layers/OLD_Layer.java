@@ -147,8 +147,8 @@ public abstract class OLD_Layer
             {
 
                 LayerBiome layerBiome = new LayerBiome(200, MainLayer);
-                layerBiome.biomes = NormalBiomeMap[depth];
-                layerBiome.ice_biomes = IceBiomeMap[depth];
+//                layerBiome.biomes = NormalBiomeMap[depth];
+//                layerBiome.ice_biomes = IceBiomeMap[depth];
                 MainLayer = layerBiome;
             }
 
@@ -221,7 +221,7 @@ public abstract class OLD_Layer
 
         }
         if (worldConfig.randomRivers)
-            MainLayer = new LayerMixWithRiver(1L, MainLayer, RiverLayer, configs, world);
+            MainLayer = new LayerRiverMix(1L, MainLayer, RiverLayer/** /, configs, world/**/);
         else
             MainLayer = new LayerMix(1L, MainLayer, configs, world);
 
