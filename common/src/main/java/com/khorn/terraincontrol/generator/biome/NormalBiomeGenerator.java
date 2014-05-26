@@ -3,12 +3,14 @@ package com.khorn.terraincontrol.generator.biome;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.configuration.WorldConfig;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
+import com.khorn.terraincontrol.generator.biome.layers.release_1_7.LayerR17;
 
 /**
  * This is the normal biome mode, which has all of Terrain Control's features.
  */
 public class NormalBiomeGenerator extends BiomeGenerator
 {
+
     private Layer unZoomedLayer;
     private Layer biomeLayer;
     private OutputType defaultOutputType = OutputType.FULL;
@@ -17,7 +19,7 @@ public class NormalBiomeGenerator extends BiomeGenerator
     {
         super(world, cache);
 
-        Layer[] layers = Layer.Init(world.getSeed(), world);
+        Layer[] layers = LayerR17.Init(world.getSeed(), world);
 
         if (world.getSettings().worldConfig.improvedRivers)
             defaultOutputType = OutputType.WITHOUT_RIVERS;
@@ -121,4 +123,5 @@ public class NormalBiomeGenerator extends BiomeGenerator
     {
         return true;
     }
+
 }
