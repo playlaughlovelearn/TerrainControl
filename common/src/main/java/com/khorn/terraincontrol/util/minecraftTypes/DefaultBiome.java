@@ -244,7 +244,7 @@ public enum DefaultBiome
     //t>>	both our side and mc side considered. From BiomeGenBase class (MCP)
     public boolean isSnowEnabled()
     {
-        return true /* this.enableSnow */;
+        return false /* this.enableSnow */;
     }
 
     static
@@ -334,7 +334,7 @@ public enum DefaultBiome
     //t>>	both our side and mc side considered. From BiomeGenBase class (MCP)
     public TempCategory getBiomeTemperatureCategory()
     {
-        return TempCategory.MEDIUM;
+        return TempCategory.WARM;
     }
     
     //t>>	This really shouldnt be here. Our Biome Definition method is VERY 
