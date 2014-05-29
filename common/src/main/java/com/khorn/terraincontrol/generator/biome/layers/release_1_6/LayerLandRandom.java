@@ -4,8 +4,6 @@ package com.khorn.terraincontrol.generator.biome.layers.release_1_6;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
 
-import static com.khorn.terraincontrol.generator.biome.layers.release_1_6.LayerR16.LandBit;
-
 public class LayerLandRandom extends Layer
 {
     public LayerLandRandom(long seed, Layer childLayer)

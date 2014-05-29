@@ -9,6 +9,45 @@ import com.khorn.terraincontrol.generator.biome.ArraysCache;
 public abstract class Layer
 {
 
+    /*
+     * LayerIsland - chance to big land
+     * LayerLandRandom - a(3) - chance to increase big land
+     * GenLayerIcePlains - chance to ice
+     * GenLayerMushroomIsland - chance to mushroom island
+     *
+     * biome:
+     * 1) is island
+     * 2) size
+     * 3) chance
+     * 4) is shore
+     * 5) color
+     * 6) temperature
+     * 7) downfall
+     * 8) is snow biome
+     * 9) Have rivers
+     *
+     * world
+     * 1) chance to lands
+     * 2) size of big lands
+     * 3) chance to increase lands
+     * 4) Chance for ice area
+     * 5) Ice area size
+     * 6) Rivers
+     * 7) Rivers size
+     */
+    
+    //>>	Masking Bits
+    protected static final short BiomeBits = 1023;      //>>	Bits 1-10       // 255 63
+    protected static final short LandBit = 1024;        //>>	Bit 11          // 256 64
+    protected static final short IceBit = 2048;         //>>	Bit 12          // 512  128
+    protected static final short RiverBitOne = 4096;    //>>	Bit 13
+    protected static final short RiverBitTwo = 8192;    //>>	Bit 14
+    protected static final short IslandBit = 16384;     //>>	Bit 15          // 4096 1024
+    protected static final short GroupBits = 16384;     //>>	Bit 15          // 4096 1024
+    protected static final short RiverBits = 12288;     //>>	Bits 13 & 14    //3072 768
+    protected static final int   RareBiomeBit = 32768;
+    
+    //>>	Base Values
     protected long worldGenSeed;
     public Layer child;
     private long chunkSeed;

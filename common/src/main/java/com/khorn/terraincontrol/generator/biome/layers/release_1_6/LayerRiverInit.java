@@ -3,9 +3,6 @@ package com.khorn.terraincontrol.generator.biome.layers.release_1_6;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
 
-import static com.khorn.terraincontrol.generator.biome.layers.release_1_6.LayerR16.RiverBitOne;
-import static com.khorn.terraincontrol.generator.biome.layers.release_1_6.LayerR16.RiverBitTwo;
-
 public class LayerRiverInit extends Layer
 {
 

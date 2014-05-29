@@ -21,40 +21,6 @@ import java.util.ArrayList;
 public abstract class LayerR16 extends Layer
 {
 
-    /*
-     * LayerIsland - chance to big land
-     * LayerLandRandom - a(3) - chance to increase big land
-     * GenLayerIcePlains - chance to ice
-     * GenLayerMushroomIsland - chance to mushroom island
-     *
-     * biome:
-     * 1) is island
-     * 2) size
-     * 3) chance
-     * 4) is shore
-     * 5) color
-     * 6) temperature
-     * 7) downfall
-     * 8) is snow biome
-     * 9) Have rivers
-     *
-     * world
-     * 1) chance to lands
-     * 2) size of big lands
-     * 3) chance to increase lands
-     * 4) Chance for ice area
-     * 5) Ice area size
-     * 6) Rivers
-     * 7) Rivers size
-     */
-    protected static final short BiomeBits = 1023; // 255 63
-    protected static final short LandBit = 1024;   // 256 64
-    protected static final short RiverBits = 12288; //3072 768
-    protected static final short RiverBitOne = 4096;
-    protected static final short RiverBitTwo = 8192;
-    protected static final short IceBit = 2048;   // 512  128
-    protected static final short IslandBit = 16384; // 4096 1024
-
     protected static int GetBiomeFromLayer(int BiomeAndLand)
     {
         if ((BiomeAndLand & LandBit) != 0)
@@ -76,7 +42,7 @@ public abstract class LayerR16 extends Layer
         LocalBiome[][] NormalBiomeMap = new LocalBiome[worldConfig.GenerationDepth + 1][];
         LocalBiome[][] IceBiomeMap = new LocalBiome[worldConfig.GenerationDepth + 1][];
 
-        //>>	>>START - How to handle this when biome groups are implemented? 
+        //>>	GENERATION DEPTH, BIOME RARITY
         for (int i = 0; i < worldConfig.GenerationDepth + 1; i++)
         {
             ArrayList<LocalBiome> normalBiomes = new ArrayList<LocalBiome>();
@@ -145,8 +111,8 @@ public abstract class LayerR16 extends Layer
             {
 
                 LayerBiome layerBiome = new LayerBiome(200, MainLayer);
-//                layerBiome.biomes = NormalBiomeMap[depth];
-//                layerBiome.ice_biomes = IceBiomeMap[depth];
+                layerBiome.biomes = NormalBiomeMap[depth];
+                layerBiome.ice_biomes = IceBiomeMap[depth];
                 MainLayer = layerBiome;
             }
 

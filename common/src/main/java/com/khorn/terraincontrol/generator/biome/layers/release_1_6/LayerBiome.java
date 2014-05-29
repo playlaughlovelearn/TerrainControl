@@ -4,9 +4,6 @@ import com.khorn.terraincontrol.LocalBiome;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
 
-import static com.khorn.terraincontrol.generator.biome.layers.release_1_6.LayerR16.BiomeBits;
-import static com.khorn.terraincontrol.generator.biome.layers.release_1_6.LayerR16.IceBit;
-
 /**
  * This class is kept here for reference during the BiomeGroups feature is
  * implemented
@@ -17,8 +14,7 @@ public class LayerBiome extends Layer
     public LocalBiome[] biomes;
     public LocalBiome[] ice_biomes;
 
-    public LayerBiome(long seed, Layer childLayer/* ,
-     * WorldType worldType */)
+    public LayerBiome(long seed, Layer childLayer)
     {
         super(seed);
         this.child = childLayer;
