@@ -108,7 +108,7 @@ public class MapWriter implements Runnable
         long time = System.currentTimeMillis();
 
         BufferedImage biomeImage = new BufferedImage(height * 16, width * 16, BufferedImage.TYPE_INT_RGB);
-        BufferedImage temperatureImage = new BufferedImage(height * 16, width * 16, BufferedImage.TYPE_INT_RGB);
+//        BufferedImage temperatureImage = new BufferedImage(height * 16, width * 16, BufferedImage.TYPE_INT_RGB);
 
         int imageX = 0;
         int imageY = 0;
@@ -164,8 +164,8 @@ public class MapWriter implements Runnable
                             biomeImage.setRGB(imageX, imageY, colors[biomeId]);
 
                             // Temperature
-                            Color temperatureColor = getBiomeTemperatureColor(biomeBuffer[arrayPosition], localWorld);
-                            temperatureImage.setRGB(imageX, imageY, temperatureColor.getRGB());
+//                            Color temperatureColor = getBiomeTemperatureColor(biomeBuffer[arrayPosition], localWorld);
+//                            temperatureImage.setRGB(imageX, imageY, temperatureColor.getRGB());
                         } catch (ArrayIndexOutOfBoundsException ex)
                         {
                             TerrainControl.log(LogMarker.TRACE, "BiomeBuff Idx::{}<{}x/{}z>, Len::{}, ID::{} | Colors Len::{}",
@@ -184,7 +184,7 @@ public class MapWriter implements Runnable
             ImageIO.write(biomeImage, "png", new File(label + world.worldData.getName() + "_biome.png"));
 
             // Write temperatures
-            ImageIO.write(temperatureImage, "png", new File(label + world.worldData.getName() + "_temperature.png"));
+//            ImageIO.write(temperatureImage, "png", new File(label + world.worldData.getName() + "_temperature.png"));
 
             sender.sendMessage(BaseCommand.MESSAGE_COLOR + "Done");
         } catch (IOException e)

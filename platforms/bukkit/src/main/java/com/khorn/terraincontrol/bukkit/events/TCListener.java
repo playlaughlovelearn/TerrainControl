@@ -40,7 +40,7 @@ public class TCListener implements Listener
             List<String> args = new ArrayList<String>();
             args.add("world");
             args.add("-s");
-            args.add("300");
+            args.add("475");
             new MapCommand(this.tcPlugin).onCommand(this.tcPlugin.getServer().getConsoleSender(), args);
     }
 
