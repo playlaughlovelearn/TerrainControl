@@ -6,6 +6,7 @@ import com.khorn.terraincontrol.configuration.standard.PluginStandardValues;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -36,6 +37,11 @@ public class TCListener implements Listener
     public void onWorldInit(WorldInitEvent event)
     {
         this.tcPlugin.onWorldInit(event.getWorld());
+            List<String> args = new ArrayList<String>();
+            args.add("world");
+            args.add("-s");
+            args.add("300");
+            new MapCommand(this.tcPlugin).onCommand(this.tcPlugin.getServer().getConsoleSender(), args);
     }
 
     @EventHandler
