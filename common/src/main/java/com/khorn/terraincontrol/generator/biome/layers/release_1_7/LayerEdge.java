@@ -32,6 +32,18 @@ public class LayerEdge extends LayerR17
         }
     }
 
+    /**
+     * Helper method to clean up the Layer class for the 1.7 generator
+     */
+    public static LayerEdge allEdges(long seed, Layer layer)
+    {
+        LayerEdge baseLayer;
+        baseLayer = new LayerEdge(seed, layer, LayerEdge.Mode.COOL_WARM);
+        baseLayer = new LayerEdge(seed, baseLayer, LayerEdge.Mode.HEAT_ICE);
+        baseLayer = new LayerEdge(seed + 1L, baseLayer, LayerEdge.Mode.SPECIAL);
+        return baseLayer;
+    }
+
     private int[] getCOLD_WARMInts(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
         int x0 = x - 1;
@@ -57,8 +69,9 @@ public class LayerEdge extends LayerR17
                     boolean threePresent = northCheck == 3 || eastCheck == 3 || westCheck == 3 || southCheck == 3;
                     boolean fourPresent = northCheck == 4 || eastCheck == 4 || westCheck == 4 || southCheck == 4;
 
+                    //>>	Checks if ExtremeHills or Forest is present
                     if (threePresent || fourPresent)
-                    {
+                    {//>>	Sets to Desert
                         selection = 2;
                     }
                 }
@@ -93,9 +106,9 @@ public class LayerEdge extends LayerR17
                     int westCheck = childInts[xi + 1 - 1 + (zi + 1) * xSise0];
                     boolean twoPresent = northCheck == 2 || eastCheck == 2 || westCheck == 2 || southCheck == 2;
                     boolean onePresent = northCheck == 1 || eastCheck == 1 || westCheck == 1 || southCheck == 1;
-
+                    //>>	Checks if Ocean or plains are present
                     if (onePresent || twoPresent)
-                    {
+                    {//>>	Sets to Extreme Hills
                         selection = 3;
                     }
                 }
@@ -109,6 +122,7 @@ public class LayerEdge extends LayerR17
 
     private int[] getSPECIALInts(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
+        //>>	This sets ints for LayerBiome to place the rare biomes
         int[] childInts = this.child.getInts(cache, x, z, xSize, zSize);
         int[] thisInts = cache.getArray(xSize * zSize);
 
@@ -121,7 +135,7 @@ public class LayerEdge extends LayerR17
 
                 if (selection != 0 && this.nextInt(13) == 0)
                 {
-                    selection |= 1 + this.nextInt(15) << 8 & 3840;
+                    selection |= RareBiomeBit;
                 }
 
                 thisInts[xi + zi * xSize] = selection;

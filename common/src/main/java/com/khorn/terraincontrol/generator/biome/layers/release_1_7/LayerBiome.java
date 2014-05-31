@@ -40,15 +40,19 @@ public class LayerBiome extends LayerR17
             for (int xi = 0; xi < xSize; ++xi) {
                 this.initChunkSeed((long) (xi + x), (long) (zi + z));
                 int currentPiece = parentIds[xi + zi * xSize];
-                int var10 = (currentPiece & 3840) >> 8;
-                currentPiece &= -3841;
+                boolean isRareBiome = (currentPiece & RareBiomeBit) != 0;
+                currentPiece &= ~RareBiomeBit;
 
-                if (isOcean(currentPiece)) {
+                //>>	Preservation of mushroom island
+                if (isOcean(currentPiece)) {    
                     thisIds[xi + zi * xSize] = currentPiece;
                 } else if (currentPiece == DefaultBiome.MUSHROOM_ISLAND.Id) {
                     thisIds[xi + zi * xSize] = currentPiece;
+                //>>	Start of 4 groups
+                    
+                //>>	DRY GROUP
                 } else if (currentPiece == 1) {
-                    if (var10 > 0) {
+                    if (isRareBiome) {
                         if (this.nextInt(3) == 0) {
                             thisIds[xi + zi * xSize] = DefaultBiome.MESA_PLATEAU.Id;
                         } else {
@@ -57,18 +61,24 @@ public class LayerBiome extends LayerR17
                     } else {
                         thisIds[xi + zi * xSize] = this.dryWarmBiomes[this.nextInt(this.dryWarmBiomes.length)].Id;
                     }
+                    
+                //>>	LUSH GROUP
                 } else if (currentPiece == 2) {
-                    if (var10 > 0) {
+                    if (isRareBiome) {
                         thisIds[xi + zi * xSize] = DefaultBiome.JUNGLE.Id;
                     } else {
                         thisIds[xi + zi * xSize] = this.mediumLushBiomes[this.nextInt(this.mediumLushBiomes.length)].Id;
                     }
+                    
+                 //>>	COLD GROUP
                 } else if (currentPiece == 3) {
-                    if (var10 > 0) {
+                    if (isRareBiome) {
                         thisIds[xi + zi * xSize] = DefaultBiome.MEGA_TAIGA.Id;
                     } else {
                         thisIds[xi + zi * xSize] = this.coldBiomes[this.nextInt(this.coldBiomes.length)].Id;
                     }
+                    
+                 //>>	SNOWY GROUP
                 } else if (currentPiece == 4) {
                     thisIds[xi + zi * xSize] = this.snowyBiomes[this.nextInt(this.snowyBiomes.length)].Id;
                 } else {
