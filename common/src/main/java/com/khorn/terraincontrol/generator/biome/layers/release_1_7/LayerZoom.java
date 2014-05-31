@@ -35,20 +35,14 @@ public class LayerZoom extends Layer
             for (int xi = childInts[xi0 + 0 + (zi + 1) * xSize0]; xi0 < xSize0 - 1; ++xi0)
             {
                 this.initChunkSeed((long) (xi0 + x0 << 1), (long) (zi + z0 << 1));
-                int var18 = childInts[xi0 + 1 + (zi + 0) * xSize0];
-                int var19 = childInts[xi0 + 1 + (zi + 1) * xSize0];
+                int northCheck = childInts[xi0 + 1 + (zi + 0) * xSize0];
+                int centerCheck = childInts[xi0 + 1 + (zi + 1) * xSize0];
                 thisInts[cbi] = childValue;
-                thisInts[cbi++ + xci] = this.getRandomInArray(new int[]
-                {
-                    childValue, xi
-                });
-                thisInts[cbi] = this.getRandomInArray(new int[]
-                {
-                    childValue, var18
-                });
-                thisInts[cbi++ + xci] = this.getRandomOf4(childValue, var18, xi, var19);
-                childValue = var18;
-                xi = var19;
+                thisInts[cbi++ + xci] = this.getRandomInArray(new int[]{childValue, xi});
+                thisInts[cbi] = this.getRandomInArray(new int[]{childValue, northCheck});
+                thisInts[cbi++ + xci] = this.getRandomOf4(childValue, northCheck, xi, centerCheck);
+                childValue = northCheck;
+                xi = centerCheck;
             }
         }
 
@@ -66,11 +60,11 @@ public class LayerZoom extends Layer
      * Magnify a layer. Parms are seed adjustment, layer, number of times to
      * magnify
      */
-    public static Layer magnify(long seedAdjust, Layer layer, int magnification)
+    public static Layer magnify(long seedBase, Layer layer, int magnification)
     {
         Object baseLayer = layer;
         for (int mi = 0; mi < magnification; ++mi)
-            baseLayer = new LayerZoom(seedAdjust + (long) mi, (Layer) baseLayer);
+            baseLayer = new LayerZoom(seedBase + (long) mi, (Layer) baseLayer);
         return (Layer) baseLayer;
     }
 
