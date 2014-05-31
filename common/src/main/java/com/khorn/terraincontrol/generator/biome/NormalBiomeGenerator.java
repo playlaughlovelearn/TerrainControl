@@ -1,8 +1,11 @@
 package com.khorn.terraincontrol.generator.biome;
 
 import com.khorn.terraincontrol.LocalWorld;
+import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.configuration.WorldConfig;
+import com.khorn.terraincontrol.configuration.WorldConfig.TerrainMode;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
+import com.khorn.terraincontrol.generator.biome.layers.release_1_6.LayerR16;
 import com.khorn.terraincontrol.generator.biome.layers.release_1_7.LayerR17;
 
 /**
@@ -19,7 +22,12 @@ public class NormalBiomeGenerator extends BiomeGenerator
     {
         super(world, cache);
 
-        Layer[] layers = LayerR17.Init(world.getSeed(), world);
+        Layer[] layers;
+        if (world.getSettings().worldConfig.ModeTerrain == TerrainMode.Release_1_7_2){
+            layers = LayerR17.Init(world.getSeed(), world);
+        } else {
+            layers = LayerR16.Init(world.getSeed(), world);
+        }
 
         if (world.getSettings().worldConfig.improvedRivers)
             defaultOutputType = OutputType.WITHOUT_RIVERS;

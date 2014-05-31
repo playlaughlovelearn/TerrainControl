@@ -497,9 +497,10 @@ public class WorldConfig extends ConfigFile
         writeValue(WorldStandardValues.SETTINGS_MODE, this.SettingsMode);
 
         writeComment("Possible terrain modes: Normal, OldGenerator, TerrainTest, NotGenerate, Default");
-        writeComment("   Normal - use all features");
-        writeComment("   OldGenerator - generate land like Beta 1.7.3 generator");
-        writeComment("   TerrainTest - generate only terrain without any resources");
+        writeComment("   Release_1_7_2 - generate land like Minecraft 1.7.2 generator");
+        writeComment("   Normal - generate land like Minecraft 1.6.4 generator");
+        writeComment("   OldGenerator - generate land like Minecraft Beta 1.7.3 generator");
+        writeComment("   TerrainTest - generate only terrain without any resources"); //>>	This should probably be broken out into another config switch
         writeComment("   NotGenerate - generate empty chunks");
         writeComment("   Default - use default terrain generator");
         writeValue(WorldStandardValues.TERRAIN_MODE, this.ModeTerrain);
@@ -866,6 +867,7 @@ public class WorldConfig extends ConfigFile
 
     public enum TerrainMode
     {
+        Release_1_7_2,
         Normal,
         OldGenerator,
         TerrainTest,

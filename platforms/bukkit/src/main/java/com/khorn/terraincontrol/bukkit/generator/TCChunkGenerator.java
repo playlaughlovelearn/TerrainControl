@@ -54,7 +54,7 @@ public class TCChunkGenerator extends ChunkGenerator
 
         WorldConfig.TerrainMode mode = _world.getSettings().worldConfig.ModeTerrain;
 
-        if (mode == WorldConfig.TerrainMode.Normal || mode == WorldConfig.TerrainMode.OldGenerator)
+        if (mode == WorldConfig.TerrainMode.Release_1_7_2 || mode == WorldConfig.TerrainMode.Normal || mode == WorldConfig.TerrainMode.OldGenerator)
             this.BlockPopulator.add(new TCBlockPopulator(_world));
 
         if (mode == WorldConfig.TerrainMode.NotGenerate)

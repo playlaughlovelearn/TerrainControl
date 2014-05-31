@@ -661,6 +661,7 @@ public class BukkitWorld implements LocalWorld
 
             switch (this.settings.worldConfig.ModeTerrain)
             {
+                case Release_1_7_2:
                 case Normal:
                 case OldGenerator:
                     this.strongholdGen = new StrongholdGen(settings);

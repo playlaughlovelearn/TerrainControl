@@ -164,6 +164,7 @@ public class TCPlugin extends JavaPlugin
         TCChunkGenerator generator = null;
         switch (configs.worldConfig.ModeTerrain)
         {
+            case Release_1_7_2:
             case Normal:
             case TerrainTest:
             case OldGenerator:

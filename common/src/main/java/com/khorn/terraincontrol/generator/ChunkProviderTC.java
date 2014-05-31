@@ -130,8 +130,9 @@ public class ChunkProviderTC
         this.caveGen.generate(chunkCoord, blockArray);
         this.canyonGen.generate(chunkCoord, blockArray);
 
-        if (this.worldSettings.worldConfig.ModeTerrain == WorldConfig.TerrainMode.Normal
-                || this.worldSettings.worldConfig.ModeTerrain == WorldConfig.TerrainMode.OldGenerator)
+        if (this.worldSettings.worldConfig.ModeTerrain == WorldConfig.TerrainMode.Release_1_7_2
+            || this.worldSettings.worldConfig.ModeTerrain == WorldConfig.TerrainMode.Normal
+            || this.worldSettings.worldConfig.ModeTerrain == WorldConfig.TerrainMode.OldGenerator)
         {
             this.localWorld.prepareDefaultStructures(x, z, dry);
         }
