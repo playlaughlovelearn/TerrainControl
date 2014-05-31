@@ -3,10 +3,10 @@ package com.khorn.terraincontrol.generator.biome.layers.release_1_7;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
 
-public class LayerAddSnow extends LayerR17
+public class LayerAddColdBiomeGroups extends LayerR17
 {
 
-    public LayerAddSnow(long seed, Layer childLayer)
+    public LayerAddColdBiomeGroups(long seed, Layer childLayer)
     {
         super(seed);
         this.child = childLayer;

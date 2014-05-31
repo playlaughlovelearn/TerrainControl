@@ -4,10 +4,10 @@ import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
 import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 
-public class LayerRareBiome extends LayerR17
+public class LayerSunflowerPlains extends LayerR17
 {
 
-    public LayerRareBiome(long seed, Layer parentLayer)
+    public LayerSunflowerPlains(long seed, Layer parentLayer)
     {
         super(seed);
         this.child = parentLayer;

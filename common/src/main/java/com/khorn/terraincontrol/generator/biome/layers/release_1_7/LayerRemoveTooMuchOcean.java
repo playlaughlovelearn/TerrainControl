@@ -36,7 +36,7 @@ public class LayerRemoveTooMuchOcean extends LayerR17
                 this.initChunkSeed((long) (xi + x), (long) (zi + z));
 
                 if (centerCheck == 0 && northCheck == 0 && eastCheck == 0 && westCheck == 0 && southCheck == 0 && this.nextInt(2) == 0)
-                {
+                {   //>>	If all BiomeGroup 1 (Ocean) is found in the target area, 50% chance to set to BiomeGroup 1
                     thisInts[xi + zi * xSize] = 1;
                 }
             }

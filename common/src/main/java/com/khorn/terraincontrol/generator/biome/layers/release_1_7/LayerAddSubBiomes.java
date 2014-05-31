@@ -8,17 +8,18 @@ import org.apache.logging.log4j.Logger;
 
 import static com.khorn.terraincontrol.generator.biome.layers.release_1_7.LayerR17.compareBiomes;
 
-public class LayerHills extends LayerR17
+//>>	LayerHills
+public class LayerAddSubBiomes extends LayerR17
 {
 
     private static final Logger logger = LogManager.getLogger();
-    private Layer child2;
+    private Layer childRiver;
 
-    public LayerHills(long seed, Layer parentLayer, Layer parent2Layer)
+    public LayerAddSubBiomes(long seed, Layer MainLayer, Layer RiverLayer)
     {
         super(seed);
-        this.child = parentLayer;
-        this.child2 = parent2Layer;
+        this.child = MainLayer;
+        this.childRiver = RiverLayer;
     }
 
     /**
@@ -29,8 +30,8 @@ public class LayerHills extends LayerR17
     @Override
     public int[] getInts(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        int[] childInts = this.child.getInts(cache, x - 1, z - 1, xSize + 2, zSize + 2);
-        int[] childInts2 = this.child2.getInts(cache, x - 1, z - 1, xSize + 2, zSize + 2);
+        int[] child1Ints = this.child.getInts(cache, x - 1, z - 1, xSize + 2, zSize + 2);
+        int[] childRiverInts = this.childRiver.getInts(cache, x - 1, z - 1, xSize + 2, zSize + 2);
         int[] thisInts = cache.getArray(xSize * zSize);
 
         for (int zi = 0; zi < zSize; ++zi)
@@ -38,54 +39,56 @@ public class LayerHills extends LayerR17
             for (int xi = 0; xi < xSize; ++xi)
             {
                 this.initChunkSeed((long) (xi + x), (long) (zi + z));
-                int selection1 = childInts[xi + 1 + (zi + 1) * (xSize + 2)];
-                int selection2 = childInts2[xi + 1 + (zi + 1) * (xSize + 2)];
-                boolean s2Check = (selection2 - 2) % 29 == 0;
+                int selectionChild = child1Ints[xi + 1 + (zi + 1) * (xSize + 2)];
+                int selectionRiver = childRiverInts[xi + 1 + (zi + 1) * (xSize + 2)];
+                boolean s2Check = (selectionRiver - 2) % 29 == 0;
 
-                if (selection1 > 255)
+                if (selectionChild > 255)
                 {
-                    logger.debug("old! " + selection1);
+                    logger.debug("old! " + selectionChild);
                 }
 
-                if (selection1 != 0 && selection2 >= 2 && (selection2 - 2) % 29 == 1 && selection1 < 128)
+                //>>	If selection @ child1Layer is not BG 0 && < 128 and selection @ child2Layer is 32||61||90||119||etc
+                if (selectionChild != 0 && selectionRiver >= 2 && (selectionRiver - 2) % 29 == 1 && selectionChild < 128)
                 {
-                    if (DefaultBiome.getBiome(selection1 + 128) != null)
+                    //>>	Make Mutated Biome if possible
+                    if (DefaultBiome.getBiome(selectionChild + 128) != null)
                     {
-                        thisInts[xi + zi * xSize] = selection1 + 128;
+                        thisInts[xi + zi * xSize] = selectionChild + 128;
                     } else
                     {
-                        thisInts[xi + zi * xSize] = selection1;
+                        thisInts[xi + zi * xSize] = selectionChild;
                     }
+                //>>	is sel2 == 31||60||89||118||etc, 1 in 3 chance to set as sel1
                 } else if (this.nextInt(3) != 0 && !s2Check)
                 {
-                    thisInts[xi + zi * xSize] = selection1;
+                    thisInts[xi + zi * xSize] = selectionChild;
                 } else
                 {
-                    int newPiece = selection1;
-                    int chance;
+                    int newPiece = selectionChild;
 
-                    if (selection1 == DefaultBiome.DESERT.Id)
+                    if (selectionChild == DefaultBiome.DESERT.Id)
                     {
                         newPiece = DefaultBiome.DESERT_HILLS.Id;
-                    } else if (selection1 == DefaultBiome.FOREST.Id)
+                    } else if (selectionChild == DefaultBiome.FOREST.Id)
                     {
                         newPiece = DefaultBiome.FOREST_HILLS.Id;
-                    } else if (selection1 == DefaultBiome.BIRCH_FOREST.Id)
+                    } else if (selectionChild == DefaultBiome.BIRCH_FOREST.Id)
                     {
                         newPiece = DefaultBiome.BIRCH_FOREST_HILLS.Id;
-                    } else if (selection1 == DefaultBiome.ROOFED_FOREST.Id)
+                    } else if (selectionChild == DefaultBiome.ROOFED_FOREST.Id)
                     {
                         newPiece = DefaultBiome.PLAINS.Id;
-                    } else if (selection1 == DefaultBiome.TAIGA.Id)
+                    } else if (selectionChild == DefaultBiome.TAIGA.Id)
                     {
                         newPiece = DefaultBiome.TAIGA_HILLS.Id;
-                    } else if (selection1 == DefaultBiome.MEGA_TAIGA.Id)
+                    } else if (selectionChild == DefaultBiome.MEGA_TAIGA.Id)
                     {
                         newPiece = DefaultBiome.MEGA_TAIGA_HILLS.Id;
-                    } else if (selection1 == DefaultBiome.COLD_TAIGA.Id)
+                    } else if (selectionChild == DefaultBiome.COLD_TAIGA.Id)
                     {
                         newPiece = DefaultBiome.COLD_TAIGA_HILLS.Id;
-                    } else if (selection1 == DefaultBiome.PLAINS.Id)
+                    } else if (selectionChild == DefaultBiome.PLAINS.Id)
                     {
                         if (this.nextInt(3) == 0)
                         {
@@ -94,29 +97,28 @@ public class LayerHills extends LayerR17
                         {
                             newPiece = DefaultBiome.FOREST.Id;
                         }
-                    } else if (selection1 == DefaultBiome.ICE_PLAINS.Id)
+                    } else if (selectionChild == DefaultBiome.ICE_PLAINS.Id)
                     {
                         newPiece = DefaultBiome.ICE_MOUNTAINS.Id;
-                    } else if (selection1 == DefaultBiome.JUNGLE.Id)
+                    } else if (selectionChild == DefaultBiome.JUNGLE.Id)
                     {
                         newPiece = DefaultBiome.JUNGLE_HILLS.Id;
-                    } else if (selection1 == DefaultBiome.OCEAN.Id)
-                    {
+                    } else if (selectionChild == DefaultBiome.OCEAN.Id)
+                    { //>>	Add nearshore deep ocean!
                         newPiece = DefaultBiome.DEEP_OCEAN.Id;
-                    } else if (selection1 == DefaultBiome.EXTREME_HILLS.Id)
+                    } else if (selectionChild == DefaultBiome.EXTREME_HILLS.Id)
                     {
                         newPiece = DefaultBiome.EXTREME_HILLS_PLUS.Id;
-                    } else if (selection1 == DefaultBiome.SAVANNA.Id)
+                    } else if (selectionChild == DefaultBiome.SAVANNA.Id)
                     {
                         newPiece = DefaultBiome.SAVANNA_PLATEAU.Id;
-                    } else if (compareBiomes(selection1, DefaultBiome.MESA_PLATEAU_FOREST.Id))
+                    } else if (compareBiomes(selectionChild, DefaultBiome.MESA_PLATEAU_FOREST.Id))
                     {
                         newPiece = DefaultBiome.MESA.Id;
-                    } else if (selection1 == DefaultBiome.DEEP_OCEAN.Id && this.nextInt(3) == 0)
-                    {
-                        chance = this.nextInt(2);
+                    } else if (selectionChild == DefaultBiome.DEEP_OCEAN.Id && this.nextInt(3) == 0)
+                    { //>>	Add Deep_Ocean islands!!!
 
-                        if (chance == 0)
+                        if (this.nextInt(2) == 0)
                         {
                             newPiece = DefaultBiome.PLAINS.Id;
                         } else
@@ -125,44 +127,44 @@ public class LayerHills extends LayerR17
                         }
                     }
 
-                    if (s2Check && newPiece != selection1)
-                    {
+                    if (s2Check && newPiece != selectionChild)
+                    {//>>	More setting of mutated biomes!
                         if (DefaultBiome.getBiome(newPiece + 128) != null)
                         {
                             newPiece += 128;
                         } else
                         {
-                            newPiece = selection1;
+                            newPiece = selectionChild;
                         }
                     }
 
-                    if (newPiece == selection1)
+                    if (newPiece == selectionChild)
                     {
-                        thisInts[xi + zi * xSize] = selection1;
+                        thisInts[xi + zi * xSize] = selectionChild;
                     } else
                     {
-                        int northCheck = childInts[xi + 1 + (zi + 1 - 1) * (xSize + 2)];
-                        int southCheck = childInts[xi + 1 + (zi + 1 + 1) * (xSize + 2)];
-                        int eastCheck = childInts[xi + 1 + 1 + (zi + 1) * (xSize + 2)];
-                        int westCheck = childInts[xi + 1 - 1 + (zi + 1) * (xSize + 2)];
+                        int northCheck = child1Ints[xi + 1 + (zi + 1 - 1) * (xSize + 2)];
+                        int southCheck = child1Ints[xi + 1 + (zi + 1 + 1) * (xSize + 2)];
+                        int eastCheck = child1Ints[xi + 1 + 1 + (zi + 1) * (xSize + 2)];
+                        int westCheck = child1Ints[xi + 1 - 1 + (zi + 1) * (xSize + 2)];
                         int count = 0;
 
-                        if (compareBiomes(northCheck, selection1))
+                        if (compareBiomes(northCheck, selectionChild))
                         {
                             ++count;
                         }
 
-                        if (compareBiomes(eastCheck, selection1))
+                        if (compareBiomes(eastCheck, selectionChild))
                         {
                             ++count;
                         }
 
-                        if (compareBiomes(westCheck, selection1))
+                        if (compareBiomes(westCheck, selectionChild))
                         {
                             ++count;
                         }
 
-                        if (compareBiomes(southCheck, selection1))
+                        if (compareBiomes(southCheck, selectionChild))
                         {
                             ++count;
                         }
@@ -172,7 +174,7 @@ public class LayerHills extends LayerR17
                             thisInts[xi + zi * xSize] = newPiece;
                         } else
                         {
-                            thisInts[xi + zi * xSize] = selection1;
+                            thisInts[xi + zi * xSize] = selectionChild;
                         }
                     }
                 }

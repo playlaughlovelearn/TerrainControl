@@ -13,76 +13,80 @@ public abstract class LayerR17 extends Layer
     public static Layer[] Init(long seed, LocalWorld world)
     {
         boolean flag = false;
-        LayerIsland MainLayer = new LayerIsland(1L);
-        LayerZoomFuzzy mlA = new LayerZoomFuzzy(2000L, MainLayer);
-        LayerAddIsland mlB = new LayerAddIsland(1L, mlA);
-        LayerZoom mlC = new LayerZoom(2001L, mlB);
-        mlB = new LayerAddIsland(2L, mlC);
-        mlB = new LayerAddIsland(50L, mlB);
-        mlB = new LayerAddIsland(70L, mlB);
-        LayerRemoveTooMuchOcean mlD = new LayerRemoveTooMuchOcean(2L, mlB);
-        LayerAddSnow mlE = new LayerAddSnow(2L, mlD);
-        mlB = new LayerAddIsland(3L, mlE);
-        LayerEdge mlF = new LayerEdge(2L, mlB, LayerEdge.Mode.COOL_WARM);
-        mlF = new LayerEdge(2L, mlF, LayerEdge.Mode.HEAT_ICE);
-        mlF = new LayerEdge(3L, mlF, LayerEdge.Mode.SPECIAL);
-        mlC = new LayerZoom(2002L, mlF);
-        mlC = new LayerZoom(2003L, mlC);
-        mlB = new LayerAddIsland(4L, mlC);
-        LayerAddMushroomIsland mlG = new LayerAddMushroomIsland(5L, mlB);
-        LayerDeepOcean mlH = new LayerDeepOcean(4L, mlG);
-        Layer mlJ = LayerZoom.magnify(1000L, mlH, 0);
-        byte var5 = 4;
+        //>>	Start off by adding BiomeGroup1 to 1/10th of the map
+        LayerIsland ML = new LayerIsland(1L);
+        //>>	Zoom in an unknown amount and be a little messy about it
+        LayerZoomFuzzy ML2 = new LayerZoomFuzzy(2000L, ML);
+        //>>	Add BiomeGroup 1/2 in island fashion
+        LayerExpandLand ML3 = new LayerExpandLand(1L, ML2);
+        //>>	Zoom in with a preference towards the majority
+        LayerZoom ML3a1 = new LayerZoom(2001L, ML3);
+        //>>	More adding BG 1/2 fashion
+        ML3 = new LayerExpandLand(2L, ML3a1);
+        ML3 = new LayerExpandLand(50L, ML3);
+        ML3 = new LayerExpandLand(70L, ML3);
+        //>>	Check for BG 0 (Ocean) and set BG 1 if too much BG 0 is found
+        LayerRemoveTooMuchOcean ML3b1 = new LayerRemoveTooMuchOcean(2L, ML3);
+        
+        LayerAddColdBiomeGroups ML4 = new LayerAddColdBiomeGroups(2L, ML3b1);
+        ML3 = new LayerExpandLand(3L, ML4);
+        LayerEdge ML3c1 = LayerEdge.allEdges(2L, ML3);
+        ML3a1 = (LayerZoom) LayerZoom.magnify(2002L, ML3c1, 2);
+        ML3 = new LayerExpandLand(4L, ML3a1);
+        LayerAddMushroomIsland ML3d1 = new LayerAddMushroomIsland(5L, ML3);
+        LayerDeepOcean ML3d2 = new LayerDeepOcean(4L, ML3d1);
+        Layer ML3d3 = LayerZoom.magnify(1000L, ML3d2, 0);
+        byte zoomAmount = 4;
 
 //        if (worldType == WorldType.LARGE_BIOMES) {
-//            var5 = 6;
+//            zoomAmount = 6;
 //        }
         if (flag)
         {
-            var5 = 4;
+            zoomAmount = 4;
         }
 
-        Layer mlK = LayerZoom.magnify(1000L, mlJ, 0);
-        LayerRiverInit mlL = new LayerRiverInit(100L, mlK);
-        Object mlM = new LayerBiome(200L, mlJ);
+        Layer RL1 = LayerZoom.magnify(1000L, ML3d3, 0);
+        LayerRiverInit RL1a = new LayerRiverInit(100L, RL1);
+        Object ML3d4 = new LayerBiome(200L, ML3d3);
 
         if (!flag)
         {
-            Layer mlN = LayerZoom.magnify(1000L, (Layer) mlM, 2);
-            mlM = new LayerBiomeEdge(1000L, mlN);
+            Layer ML3d5 = LayerZoom.magnify(1000L, (Layer) ML3d4, 2);
+            ML3d4 = new LayerBiomeEdge(1000L, ML3d5);
         }
 
-        Layer MlO = LayerZoom.magnify(1000L, mlL, 2);
-        LayerHills mlP = new LayerHills(1000L, (Layer) mlM, MlO);
-        mlK = LayerZoom.magnify(1000L, mlL, 2);
-        mlK = LayerZoom.magnify(1000L, mlK, var5);
-        LayerRiver mlQ = new LayerRiver(1L, mlK);
-        LayerSmooth mlR = new LayerSmooth(1000L, mlQ);
-        mlM = new LayerRareBiome(1001L, mlP);
+        Layer RL1a1 = LayerZoom.magnify(1000L, RL1a, 2);
+        LayerAddSubBiomes ML3d5 = new LayerAddSubBiomes(1000L, (Layer) ML3d4, RL1a1);
+        RL1 = LayerZoom.magnify(1000L, RL1a, 2);
+        RL1 = LayerZoom.magnify(1000L, RL1, zoomAmount);
+        LayerRiver RL2b = new LayerRiver(1L, RL1);
+        LayerSmooth RL2b1 = new LayerSmooth(1000L, RL2b);
+        ML3d4 = new LayerSunflowerPlains(1001L, ML3d5);
 
-        for (int var9 = 0; var9 < var5; ++var9)
+        for (int zAi = 0; zAi < zoomAmount; ++zAi)
         {
-            mlM = new LayerZoom((long) (1000 + var9), (Layer) mlM);
+            ML3d4 = new LayerZoom((long) (1000 + zAi), (Layer) ML3d4);
 
-            if (var9 == 0)
+            if (zAi == 0)
             {
-                mlM = new LayerAddIsland(3L, (Layer) mlM);
+                ML3d4 = new LayerExpandLand(3L, (Layer) ML3d4);
             }
 
-            if (var9 == 1)
+            if (zAi == 1)
             {
-                mlM = new LayerShore(1000L, (Layer) mlM);
+                ML3d4 = new LayerShore(1000L, (Layer) ML3d4);
             }
         }
 
-        LayerSmooth mlS = new LayerSmooth(1000L, (Layer) mlM);
-        LayerRiverMix mlT = new LayerRiverMix(100L, mlS, mlR);
-        LayerZoomVoronoi mlU = new LayerZoomVoronoi(10L, mlT);
-        mlT.initWorldGenSeed(seed);
-        mlU.initWorldGenSeed(seed);
+        LayerSmooth ML3d6 = new LayerSmooth(1000L, (Layer) ML3d4);
+        LayerRiverMix unZoomL1 = new LayerRiverMix(100L, ML3d6, RL2b1);
+        LayerZoomVoronoi BioL1 = new LayerZoomVoronoi(10L, unZoomL1);
+        unZoomL1.initWorldGenSeed(seed);
+        BioL1.initWorldGenSeed(seed);
         return new Layer[]
         {
-            mlT, mlU, mlT
+            unZoomL1, BioL1
         };
     }
 
