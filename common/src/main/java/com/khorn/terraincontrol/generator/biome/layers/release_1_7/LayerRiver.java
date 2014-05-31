@@ -24,13 +24,13 @@ public class LayerRiver extends LayerR17
 
         for (int zi = 0; zi < zSize; ++zi) {
             for (int xi = 0; xi < xSize; ++xi) {
-                int a = this.makeNoMoreThan3(parentInts[xi + 0 + (zi + 1) * xSize0]);
-                int b = this.makeNoMoreThan3(parentInts[xi + 2 + (zi + 1) * xSize0]);
-                int c = this.makeNoMoreThan3(parentInts[xi + 1 + (zi + 0) * xSize0]);
-                int d = this.makeNoMoreThan3(parentInts[xi + 1 + (zi + 2) * xSize0]);
-                int abcd = this.makeNoMoreThan3(parentInts[xi + 1 + (zi + 1) * xSize0]);
+                int northCheck = this.makeNoMoreThan3(parentInts[xi + 0 + (zi + 1) * xSize0]);
+                int eastCheck = this.makeNoMoreThan3(parentInts[xi + 2 + (zi + 1) * xSize0]);
+                int westCheck = this.makeNoMoreThan3(parentInts[xi + 1 + (zi + 0) * xSize0]);
+                int southCheck = this.makeNoMoreThan3(parentInts[xi + 1 + (zi + 2) * xSize0]);
+                int centerCheck = this.makeNoMoreThan3(parentInts[xi + 1 + (zi + 1) * xSize0]);
 
-                if (abcd == a && abcd == c && abcd == b && abcd == d) {
+                if (centerCheck == northCheck && centerCheck == westCheck && centerCheck == eastCheck && centerCheck == southCheck) {
                     thisInts[xi + zi * xSize] = -1;
                 } else {
                     thisInts[xi + zi * xSize] = DefaultBiome.RIVER.Id;
