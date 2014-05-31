@@ -23,6 +23,7 @@ public class LayerRiverInit extends Layer
             for (int xi = 0; xi < xSize; ++xi)
             {
                 this.initChunkSeed((long) (xi + x), (long) (zi + z));
+                //>>	If not Ocean, set to a random value from 2 - 300,000
                 thisInts[xi + zi * xSize] = parentInts[xi + zi * xSize] > 0 ? this.nextInt(299999) + 2 : 0;
             }
         }

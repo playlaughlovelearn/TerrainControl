@@ -43,9 +43,11 @@ public abstract class Layer
     protected static final short RiverBitOne = 4096;    //>>	Bit 13
     protected static final short RiverBitTwo = 8192;    //>>	Bit 14
     protected static final short IslandBit = 16384;     //>>	Bit 15          // 4096 1024
-    protected static final short GroupBits = 16384;     //>>	Bit 15          // 4096 1024
+    protected static final int   RareBiomeBit = 32768;  //>>	Bit 16
+    protected static final int   GroupBits = 16384;     //>>	Bit 17-22       // 64 Possible Biome Groups
     protected static final short RiverBits = 12288;     //>>	Bits 13 & 14    //3072 768
-    protected static final int   RareBiomeBit = 32768;
+    //>>	Masking Bit Shifting Amounts
+    protected static final short GroupShift = 16;
     
     //>>	Base Values
     protected long worldGenSeed;
