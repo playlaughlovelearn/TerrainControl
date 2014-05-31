@@ -65,8 +65,6 @@ import com.khorn.terraincontrol.configuration.standard.MinecraftBiomeTemplates.T
 import com.khorn.terraincontrol.configuration.standard.MinecraftBiomeTemplates.TaigaMountains;
 import com.khorn.terraincontrol.configuration.standard.*;
 import com.khorn.terraincontrol.logging.LogMarker;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Enumeration containing the Proper names and IDs of the default Minecraft

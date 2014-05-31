@@ -1,7 +1,6 @@
 package com.khorn.terraincontrol.generator.biome;
 
 import com.khorn.terraincontrol.LocalWorld;
-import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.configuration.WorldConfig;
 import com.khorn.terraincontrol.configuration.WorldConfig.TerrainMode;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
