@@ -1,5 +1,6 @@
 package com.khorn.terraincontrol.generator.biome.layers.release_1_7;
 
+import com.khorn.terraincontrol.configuration.WorldConfig;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
 import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
@@ -13,7 +14,7 @@ public class LayerBiome extends LayerR17
     private DefaultBiome[] coldBiomes;
     private DefaultBiome[] snowyBiomes;
 
-    public LayerBiome(long seed, Layer parentLayer) {
+    public LayerBiome(long seed, Layer parentLayer, WorldConfig config) {
         super(seed);
         this.dryWarmBiomes = new DefaultBiome[]{DefaultBiome.DESERT, DefaultBiome.DESERT, DefaultBiome.DESERT, DefaultBiome.SAVANNA, DefaultBiome.SAVANNA, DefaultBiome.PLAINS};
         this.mediumLushBiomes = new DefaultBiome[]{DefaultBiome.FOREST, DefaultBiome.ROOFED_FOREST, DefaultBiome.EXTREME_HILLS, DefaultBiome.PLAINS, DefaultBiome.BIRCH_FOREST, DefaultBiome.SWAMPLAND};

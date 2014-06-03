@@ -110,7 +110,7 @@ public abstract class LayerR16 extends Layer
             if (NormalBiomeMap[depth].length != 0 || IceBiomeMap[depth].length != 0)
             {
 
-                LayerBiome layerBiome = new LayerBiome(200, MainLayer);
+                LayerBiome layerBiome = new LayerBiome(200, MainLayer, worldConfig);
                 layerBiome.biomes = NormalBiomeMap[depth];
                 layerBiome.ice_biomes = IceBiomeMap[depth];
                 MainLayer = layerBiome;

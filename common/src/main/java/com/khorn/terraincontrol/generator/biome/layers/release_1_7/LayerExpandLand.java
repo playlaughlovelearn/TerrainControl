@@ -37,6 +37,7 @@ public class LayerExpandLand extends LayerR17
                 if (centerCheck == 0 && (nwCheck != 0 || neCheck != 0 || swCheck != 0 || seCheck != 0))
                 {
                     int chance = 1;
+                    //>>	Default to dry biome group
                     int chanceOut = 1;
                     //>>	100% on non-ocean
                     if (nwCheck != 0 && this.nextInt(chance++) == 0)
@@ -63,8 +64,8 @@ public class LayerExpandLand extends LayerR17
                     {   //>>	set chanceOut (one of the checks or plains)
                         thisInts[xi + zi * xSize] = chanceOut;
                     } else if (chanceOut == 4)
-                    {   //>>	set forest, Land Tag?
-                        thisInts[xi + zi * xSize] = 4;
+                    {   //>>	set snowy group
+                        thisInts[xi + zi * xSize] = chanceOut;
                     } else
                     {   //>>	set Ocean
                         thisInts[xi + zi * xSize] = 0;
@@ -73,10 +74,10 @@ public class LayerExpandLand extends LayerR17
                 } else if (centerCheck > 0 && (nwCheck == 0 || neCheck == 0 || swCheck == 0 || seCheck == 0))
                 {   //>>	20% chance 
                     if (this.nextInt(5) == 0)
-                    {   //>>	if center is Forest? Land Tag?
+                    {   //>>	if center is snowy biome group
                         if (centerCheck == 4)
-                        {   //>>	set forest? Land Tag?
-                            thisInts[xi + zi * xSize] = 4;
+                        {   //>>	set snowy group
+                            thisInts[xi + zi * xSize] = centerCheck;
                         } else
                         {   //>>	set ocean
                             thisInts[xi + zi * xSize] = 0;

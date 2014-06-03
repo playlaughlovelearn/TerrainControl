@@ -15,10 +15,10 @@ public class LayerAddSubBiomes extends LayerR17
     private static final Logger logger = LogManager.getLogger();
     private Layer childRiver;
 
-    public LayerAddSubBiomes(long seed, Layer MainLayer, Layer RiverLayer)
+    public LayerAddSubBiomes(long seed, Layer BiomeLayer, Layer RiverLayer)
     {
         super(seed);
-        this.child = MainLayer;
+        this.child = BiomeLayer;
         this.childRiver = RiverLayer;
     }
 
@@ -30,7 +30,7 @@ public class LayerAddSubBiomes extends LayerR17
     @Override
     public int[] getInts(ArraysCache cache, int x, int z, int xSize, int zSize)
     {
-        int[] child1Ints = this.child.getInts(cache, x - 1, z - 1, xSize + 2, zSize + 2);
+        int[] childBiomeInts = this.child.getInts(cache, x - 1, z - 1, xSize + 2, zSize + 2);
         int[] childRiverInts = this.childRiver.getInts(cache, x - 1, z - 1, xSize + 2, zSize + 2);
         int[] thisInts = cache.getArray(xSize * zSize);
 
@@ -39,7 +39,7 @@ public class LayerAddSubBiomes extends LayerR17
             for (int xi = 0; xi < xSize; ++xi)
             {
                 this.initChunkSeed((long) (xi + x), (long) (zi + z));
-                int selectionChild = child1Ints[xi + 1 + (zi + 1) * (xSize + 2)];
+                int selectionChild = childBiomeInts[xi + 1 + (zi + 1) * (xSize + 2)];
                 int selectionRiver = childRiverInts[xi + 1 + (zi + 1) * (xSize + 2)];
                 boolean s2Check = (selectionRiver - 2) % 29 == 0;
 
@@ -143,10 +143,10 @@ public class LayerAddSubBiomes extends LayerR17
                         thisInts[xi + zi * xSize] = selectionChild;
                     } else
                     {
-                        int northCheck = child1Ints[xi + 1 + (zi + 1 - 1) * (xSize + 2)];
-                        int southCheck = child1Ints[xi + 1 + (zi + 1 + 1) * (xSize + 2)];
-                        int eastCheck = child1Ints[xi + 1 + 1 + (zi + 1) * (xSize + 2)];
-                        int westCheck = child1Ints[xi + 1 - 1 + (zi + 1) * (xSize + 2)];
+                        int northCheck = childBiomeInts[xi + 1 + (zi + 1 - 1) * (xSize + 2)];
+                        int southCheck = childBiomeInts[xi + 1 + (zi + 1 + 1) * (xSize + 2)];
+                        int eastCheck = childBiomeInts[xi + 1 + 1 + (zi + 1) * (xSize + 2)];
+                        int westCheck = childBiomeInts[xi + 1 - 1 + (zi + 1) * (xSize + 2)];
                         int count = 0;
 
                         if (compareBiomes(northCheck, selectionChild))

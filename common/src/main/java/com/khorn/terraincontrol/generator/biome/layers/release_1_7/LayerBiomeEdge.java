@@ -33,7 +33,10 @@ public class LayerBiomeEdge extends LayerR17
                 this.initChunkSeed((long) (xi + x), (long) (zi + z));
                 int selection = parentInts[xi + 1 + (zi + 1) * (xSize + 2)];
 
-                if (!this.makeEdgeFromCategory(parentInts, thisInts, xi, zi, xSize, selection, DefaultBiome.EXTREME_HILLS.Id, DefaultBiome.EXTREME_HILLS_EDGE.Id) && !this.makeEdgeFromBiome(parentInts, thisInts, xi, zi, xSize, selection, DefaultBiome.MESA_PLATEAU_FOREST.Id, DefaultBiome.MESA.Id) && !this.makeEdgeFromBiome(parentInts, thisInts, xi, zi, xSize, selection, DefaultBiome.MESA_PLATEAU.Id, DefaultBiome.MESA.Id) && !this.makeEdgeFromBiome(parentInts, thisInts, xi, zi, xSize, selection, DefaultBiome.MEGA_TAIGA.Id, DefaultBiome.TAIGA.Id))
+                if (!this.makeEdgeFromTempCategory(parentInts, thisInts, xi, zi, xSize, selection, DefaultBiome.EXTREME_HILLS.Id, DefaultBiome.EXTREME_HILLS_EDGE.Id) && 
+                    !this.makeEdgeFromBiome(parentInts, thisInts, xi, zi, xSize, selection, DefaultBiome.MESA_PLATEAU_FOREST.Id, DefaultBiome.MESA.Id) && 
+                    !this.makeEdgeFromBiome(parentInts, thisInts, xi, zi, xSize, selection, DefaultBiome.MESA_PLATEAU.Id, DefaultBiome.MESA.Id) && 
+                    !this.makeEdgeFromBiome(parentInts, thisInts, xi, zi, xSize, selection, DefaultBiome.MEGA_TAIGA.Id, DefaultBiome.TAIGA.Id))
                 {
                     int northCheck;
                     int southCheck;
@@ -85,7 +88,7 @@ public class LayerBiomeEdge extends LayerR17
         return thisInts;
     }
 
-    private boolean makeEdgeFromCategory(int[] parentInts, int[] intCache, int x, int z, int radius, int currentBiome, int checkFor, int replaceBiome)
+    private boolean makeEdgeFromTempCategory(int[] parentInts, int[] intCache, int x, int z, int radius, int currentBiome, int checkFor, int replaceBiome)
     {
         if (!compareBiomes(currentBiome, checkFor))
         {

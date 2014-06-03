@@ -3,6 +3,8 @@ package com.khorn.terraincontrol.generator.biome.layers.release_1_7;
 import com.khorn.terraincontrol.generator.biome.layers.LayerSmooth;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
+import com.khorn.terraincontrol.configuration.WorldConfig;
+import com.khorn.terraincontrol.configuration.WorldSettings;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
 import com.khorn.terraincontrol.logging.LogMarker;
 import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
@@ -12,6 +14,10 @@ public abstract class LayerR17 extends Layer
 
     public static Layer[] Init(long seed, LocalWorld world)
     {
+        
+        WorldSettings configs = world.getSettings();
+        WorldConfig worldConfig = configs.worldConfig;
+        
         boolean flag = false;
         //>>	Start off by adding BiomeGroup1 to 1/10th of the map
         LayerIsland ML = new LayerIsland(1L);
@@ -48,16 +54,15 @@ public abstract class LayerR17 extends Layer
 
         Layer RL1 = LayerZoom.magnify(1000L, ML3d3, 0);
         LayerRiverInit RL1a = new LayerRiverInit(100L, RL1);
-        Object ML3d4 = new LayerBiome(200L, ML3d3);
-
+        Layer ML3d4 = new LayerBiome(200L, ML3d3, worldConfig);
         if (!flag)
         {
-            Layer ML3d5 = LayerZoom.magnify(1000L, (Layer) ML3d4, 2);
+            Layer ML3d5 = LayerZoom.magnify(1000L, ML3d4, 2);
             ML3d4 = new LayerBiomeEdge(1000L, ML3d5);
         }
 
         Layer RL1a1 = LayerZoom.magnify(1000L, RL1a, 2);
-        LayerAddSubBiomes ML3d5 = new LayerAddSubBiomes(1000L, (Layer) ML3d4, RL1a1);
+        LayerAddSubBiomes ML3d5 = new LayerAddSubBiomes(1000L, ML3d4, RL1a1);
         RL1 = LayerZoom.magnify(1000L, RL1a, 2);
         RL1 = LayerZoom.magnify(1000L, RL1, zoomAmount);
         LayerRiver RL2b = new LayerRiver(1L, RL1);
@@ -66,20 +71,20 @@ public abstract class LayerR17 extends Layer
 
         for (int zAi = 0; zAi < zoomAmount; ++zAi)
         {
-            ML3d4 = new LayerZoom((long) (1000 + zAi), (Layer) ML3d4);
+            ML3d4 = new LayerZoom((long) (1000 + zAi), ML3d4);
 
             if (zAi == 0)
             {
-                ML3d4 = new LayerExpandLand(3L, (Layer) ML3d4);
+                ML3d4 = new LayerExpandLand(3L, ML3d4);
             }
 
             if (zAi == 1)
             {
-                ML3d4 = new LayerShore(1000L, (Layer) ML3d4);
+                ML3d4 = new LayerShore(1000L, ML3d4);
             }
         }
 
-        LayerSmooth ML3d6 = new LayerSmooth(1000L, (Layer) ML3d4);
+        LayerSmooth ML3d6 = new LayerSmooth(1000L, ML3d4);
         LayerRiverMix unZoomL1 = new LayerRiverMix(100L, ML3d6, RL2b1);
         LayerZoomVoronoi BioL1 = new LayerZoomVoronoi(10L, unZoomL1);
         unZoomL1.initWorldGenSeed(seed);

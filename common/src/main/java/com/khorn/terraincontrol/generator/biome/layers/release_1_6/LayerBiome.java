@@ -1,6 +1,7 @@
 package com.khorn.terraincontrol.generator.biome.layers.release_1_6;
 
 import com.khorn.terraincontrol.LocalBiome;
+import com.khorn.terraincontrol.configuration.WorldConfig;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.generator.biome.layers.Layer;
 
@@ -14,7 +15,7 @@ public class LayerBiome extends Layer
     public LocalBiome[] biomes;
     public LocalBiome[] ice_biomes;
 
-    public LayerBiome(long seed, Layer childLayer)
+    public LayerBiome(long seed, Layer childLayer, WorldConfig config)
     {
         super(seed);
         this.child = childLayer;
