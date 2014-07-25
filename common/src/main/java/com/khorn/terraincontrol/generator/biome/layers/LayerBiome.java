@@ -2,17 +2,20 @@ package com.khorn.terraincontrol.generator.biome.layers;
 
 import com.khorn.terraincontrol.LocalBiome;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
+import java.util.Map;
 
 public class LayerBiome extends Layer
 {
-    public LocalBiome[] biomes;
-    public LocalBiome[] ice_biomes;
+    public Map<String, LocalBiome[]> biomes;
+//    public LocalBiome[] biomes;
+//    public LocalBiome[] ice_biomes;
 
 
-    public LayerBiome(long paramLong, Layer paramGenLayer)
+    public LayerBiome(long paramLong, Layer paramGenLayer, Map<String, LocalBiome[]> biomesForLayer)
     {
         super(paramLong);
         this.child = paramGenLayer;
+        this.biomes = biomesForLayer;
     }
 
     @Override

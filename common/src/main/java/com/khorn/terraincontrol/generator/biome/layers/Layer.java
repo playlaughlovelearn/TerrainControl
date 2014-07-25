@@ -5,12 +5,16 @@ import com.khorn.terraincontrol.LocalBiome;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.configuration.BiomeConfig;
+import com.khorn.terraincontrol.configuration.BiomeGroup;
 import com.khorn.terraincontrol.configuration.WorldConfig;
 import com.khorn.terraincontrol.configuration.WorldSettings;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public abstract class Layer
 {
@@ -46,13 +50,17 @@ public abstract class Layer
     7) Rivers size
     */
 
-    protected static final int BiomeBits = 1023; // 255 63
-    protected static final int LandBit = 1024;   // 256 64
-    protected static final int RiverBits = 12288; //3072 768
-    protected static final int RiverBitOne = 4096;
-    protected static final int RiverBitTwo = 8192;
-    protected static final int IceBit = 2048;   // 512  128
-    protected static final int IslandBit = 16384; // 4096 1024
+    protected static final int BiomeBits = 1023;            //>>	1st-10th Bits           // 255 63
+    protected static final int LandBit = 1 << 10;           //>>	11th Bit, 1024          // 256 64
+    protected static final int BiomeGroupShift = 11;        //>>	Shift amount for biome group data
+                                                            //>>	12th-18th Bits, 260096
+    protected static final int BiomeGroupBits = 127 << BiomeGroupShift;
+    protected static final int RiverShift = 18;
+    protected static final int RiverBits = 3 << RiverShift;         //>>	19th-20th Bits, 786432  //3072 768
+    protected static final int RiverBitOne = 1 << RiverShift;       //>>	19th Bit, 262144
+    protected static final int RiverBitTwo = (1 << RiverShift+1);       //>>	20th Bit, 524288
+//    protected static final int IceBit = 2048;                                               // 512  128
+    protected static final int IslandBit = 1 << 20;         //>>	21st Bit, 1048576       // 4096 1024
 
     protected static int GetBiomeFromLayer(int BiomeAndLand)
     {
@@ -68,55 +76,62 @@ public abstract class Layer
         int BigLandSize = 2;  //default 0, more - smaller
         int ChanceToIncreaseLand = 6; //default 4
         int MaxDepth = 10;
-        */
+         */
 
         WorldSettings configs = world.getSettings();
         WorldConfig worldConfig = configs.worldConfig;
 
-        LocalBiome[][] NormalBiomeMap = new LocalBiome[worldConfig.GenerationDepth + 1][];
-        LocalBiome[][] IceBiomeMap = new LocalBiome[worldConfig.GenerationDepth + 1][];
-
+        Map<String, LocalBiome[][]> GroupBiomeMap = new HashMap<String, LocalBiome[][]>();
+        //>>	Init GroupBiomeMap
+        for (BiomeGroup group : worldConfig.biomeGroups)
+        {
+            GroupBiomeMap.put(group.getGroupName(), new LocalBiome[worldConfig.GenerationDepth + 1][]);
+        }
 
         for (int i = 0; i < worldConfig.GenerationDepth + 1; i++)
         {
-            ArrayList<LocalBiome> normalBiomes = new ArrayList<LocalBiome>();
-            ArrayList<LocalBiome> iceBiomes = new ArrayList<LocalBiome>();
+            Map<String, ArrayList<LocalBiome>> BiomeGroups = new HashMap<String, ArrayList<LocalBiome>>();
+            //>>	Init BiomeGroups
+            for (BiomeGroup group : worldConfig.biomeGroups)
+            {
+                BiomeGroups.put(group.getGroupName(), new ArrayList<LocalBiome>(8));
+            }
+            //>>	Place biomes in BiomeGroups
             for (LocalBiome biome : configs.biomes)
             {
                 if (biome == null)
                     continue;
-                
+
                 BiomeConfig biomeConfig = biome.getBiomeConfig();
 
                 if (biomeConfig.biomeSize != i)
                     continue;
-                if (worldConfig.NormalBiomes.contains(biomeConfig.name))
+                for (BiomeGroup group : worldConfig.biomeGroups)
                 {
-                    for (int t = 0; t < biomeConfig.biomeRarity; t++)
-                        normalBiomes.add(biome);
-                    worldConfig.normalBiomesRarity -= biomeConfig.biomeRarity;
+                    if (group.getBiomesInGroup().contains(biomeConfig.name))
+                    {
+                        for (int t = 0; t < biomeConfig.biomeRarity; t++)
+                            BiomeGroups.get(group.getGroupName()).add(biome);
+                        worldConfig.normalBiomesRarity -= biomeConfig.biomeRarity;
+                    }
                 }
-
-                if (worldConfig.IceBiomes.contains(biomeConfig.name))
-                {
-                    for (int t = 0; t < biomeConfig.biomeRarity; t++)
-                        iceBiomes.add(biome);
-                    worldConfig.iceBiomesRarity -= biomeConfig.biomeRarity;
-                }
-
             }
 
-            if (!normalBiomes.isEmpty())
-                NormalBiomeMap[i] = normalBiomes.toArray(new LocalBiome[normalBiomes.size() + worldConfig.normalBiomesRarity]);
-            else
-                NormalBiomeMap[i] = new LocalBiome[0];
-
-            if (!iceBiomes.isEmpty())
-                IceBiomeMap[i] = iceBiomes.toArray(new LocalBiome[iceBiomes.size() + worldConfig.iceBiomesRarity]);
-            else
-                IceBiomeMap[i] = new LocalBiome[0];
-
-
+            for (String key : GroupBiomeMap.keySet())
+            {
+                LocalBiome[][] GroupLocalBiomes = GroupBiomeMap.get(key);
+                if (GroupLocalBiomes != null)
+                {
+                    ArrayList<LocalBiome> bgs = BiomeGroups.get(key);
+                    if (!bgs.isEmpty())
+                    {
+                        GroupLocalBiomes[i] = bgs.toArray(new LocalBiome[bgs.size() + worldConfig.normalBiomesRarity]);
+                    } else
+                    {
+                        GroupLocalBiomes[i] = new LocalBiome[0];
+                    }
+                }
+            }
         }
 
 
@@ -143,13 +158,20 @@ public abstract class Layer
             if (depth < (worldConfig.LandSize + worldConfig.LandFuzzy))
                 MainLayer = new LayerLandRandom(depth, MainLayer);
 
-
-            if (NormalBiomeMap[depth].length != 0 || IceBiomeMap[depth].length != 0)
+            boolean nez = false;
+            Map<String, LocalBiome[]> biomesForLayer = new HashMap<>(4);
+            for (Entry<String, LocalBiome[][]> entry : GroupBiomeMap.entrySet())
             {
-
-                LayerBiome layerBiome = new LayerBiome(200, MainLayer);
-                layerBiome.biomes = NormalBiomeMap[depth];
-                layerBiome.ice_biomes = IceBiomeMap[depth];
+                LocalBiome[][] localBiomes = entry.getValue();
+                int len = localBiomes[depth].length;
+                if (len != 0){
+                    nez = true;
+                }
+                biomesForLayer.put(entry.getKey(), localBiomes[depth]);
+            }
+            if (nez)
+            {
+                LayerBiome layerBiome = new LayerBiome(200, MainLayer, biomesForLayer);
                 MainLayer = layerBiome;
             }
 

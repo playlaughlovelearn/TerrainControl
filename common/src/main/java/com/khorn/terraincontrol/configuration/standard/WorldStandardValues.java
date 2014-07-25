@@ -99,9 +99,17 @@ public class WorldStandardValues extends Settings
             BEDROCK_BLOCK = new MaterialSetting("BedrockobBlock", DefaultMaterial.BEDROCK);
 
     public static final Setting<List<String>>
+            //>>	1.6.4 Biome pseudo-Groups
             NORMAL_BIOMES = stringListSetting("NormalBiomes", "Desert", "Forest",
                     "Extreme Hills", "Swampland", "Plains", "Taiga", "Jungle"),
             ICE_BIOMES = stringListSetting("IceBiomes", "Ice Plains"),
+            //>>	1.7.2 Biome Groups
+            R1_7_2_OCEAN_BIOME_GROUP = stringListSetting("OceanBiomes", "Ocean", "Deep Ocean"),
+            R1_7_2_DRY_WARM_BIOME_GROUP = stringListSetting("DryWarmBiomes", "Desert", "Savanna", "Plains"),
+            R1_7_2_MEDIUM_LUSH_BIOME_GROUP = stringListSetting("MediumLushBiomes", "Forest", "Roofed Forest", "Extreme Hills", "Swampland", "Plains", "Birch Forest"),
+            R1_7_2_COLD_BIOME_GROUP = stringListSetting("ColdBiomes", "Forest", "Extreme Hills", "Plains", "Taiga"),
+            R1_7_2_SNOWY_BIOME_GROUP = stringListSetting("SnowyBiomes", "Ice Plains", "Cold Taiga"),
+            //>>	Special Types
             ISLE_BIOMES = stringListSetting("IsleBiomes", "MushroomIsland",
                     "Ice Mountains", "DesertHills", "ForestHills", "TaigaHills",
                     "River", "JungleHills"),

@@ -4,10 +4,12 @@ import com.khorn.terraincontrol.BiomeIds;
 import com.khorn.terraincontrol.LocalMaterialData;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
+import com.khorn.terraincontrol.configuration.settingType.Setting;
 import com.khorn.terraincontrol.configuration.standard.WorldStandardValues;
 import com.khorn.terraincontrol.customobjects.CustomObject;
 import com.khorn.terraincontrol.generator.biome.BiomeGenerator;
 import com.khorn.terraincontrol.logging.LogMarker;
+import com.khorn.terraincontrol.util.helpers.StringHelper;
 import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 
 import java.io.File;
@@ -31,8 +33,9 @@ public class WorldConfig extends ConfigFile
     // Holds all world CustomObjects.
     public List<CustomObject> customObjects = new ArrayList<CustomObject>();
 
-    public List<String> NormalBiomes = new ArrayList<String>();
-    public List<String> IceBiomes = new ArrayList<String>();
+    //>>	For Biome Groups
+    public List<BiomeGroup> biomeGroups = new ArrayList<BiomeGroup>();
+    //>>	For Special Biome Association
     public List<String> IsleBiomes = new ArrayList<String>();
     public List<String> BorderBiomes = new ArrayList<String>();
 
@@ -170,7 +173,6 @@ public class WorldConfig extends ConfigFile
     public int worldHeightCap;
 
     public long resourcesSeed;
-
     /**
      * Creates a WorldConfig from the WorldConfig.ini file found in the given
      * directory.
@@ -276,11 +278,6 @@ public class WorldConfig extends ConfigFile
         riverRarity = lowerThanOrEqualTo(riverRarity, GenerationDepth);
         riverSize = lowerThanOrEqualTo(riverSize, GenerationDepth - riverRarity);
 
-        NormalBiomes = filterBiomes(NormalBiomes, CustomBiomeIds.keySet());
-        IceBiomes = filterBiomes(IceBiomes, CustomBiomeIds.keySet());
-        IsleBiomes = filterBiomes(IsleBiomes, CustomBiomeIds.keySet());
-        BorderBiomes = filterBiomes(BorderBiomes, CustomBiomeIds.keySet());
-
         if (biomeMode == TerrainControl.getBiomeModeManager().FROM_IMAGE)
         {
             File mapFile = new File(settingsDir, imageFile);
@@ -290,6 +287,9 @@ public class WorldConfig extends ConfigFile
                 biomeMode = TerrainControl.getBiomeModeManager().NORMAL;
             }
         }
+               
+        IsleBiomes = filterBiomes(IsleBiomes, CustomBiomeIds.keySet());
+        BorderBiomes = filterBiomes(BorderBiomes, CustomBiomeIds.keySet());
 
         imageFillBiome = (DefaultBiome.Contain(imageFillBiome) || CustomBiomeIds.keySet().contains(imageFillBiome)) ? imageFillBiome : WorldStandardValues.IMAGE_FILL_BIOME.getDefaultValue();
 
@@ -324,7 +324,7 @@ public class WorldConfig extends ConfigFile
         // Main modes
         this.SettingsMode = readSettings(WorldStandardValues.SETTINGS_MODE);
         this.ModeTerrain = readSettings(WorldStandardValues.TERRAIN_MODE);
-        this.biomeMode = TerrainControl.getBiomeModeManager().getBiomeManager((String) readSettings(WorldStandardValues.BIOME_MODE));
+        this.biomeMode = TerrainControl.getBiomeModeManager().getBiomeManager(readSettings(WorldStandardValues.BIOME_MODE));
 
         // World and water height
         this.worldHeightCapBits = readSettings(WorldStandardValues.WORLD_HEIGHT_CAP_BITS);
@@ -355,12 +355,16 @@ public class WorldConfig extends ConfigFile
         this.improvedRivers = readSettings(WorldStandardValues.IMPROVED_RIVERS);
         this.randomRivers = readSettings(WorldStandardValues.RANDOM_RIVERS);
 
-        // Biomes
-        this.NormalBiomes = readSettings(WorldStandardValues.NORMAL_BIOMES);
-        this.IceBiomes = readSettings(WorldStandardValues.ICE_BIOMES);
+        // Biome Groups
+        ReadBiomeGroups();
+        
+        // Special Biome Lists
         this.IsleBiomes = readSettings(WorldStandardValues.ISLE_BIOMES);
         this.BorderBiomes = readSettings(WorldStandardValues.BORDER_BIOMES);
+        
+        // Biomes
         ReadCustomBiomes();
+        
 
         // Images
         this.imageMode = readSettings(WorldStandardValues.IMAGE_MODE);
@@ -451,6 +455,104 @@ public class WorldConfig extends ConfigFile
         this.oldTerrainGenerator = this.ModeTerrain == TerrainMode.OldGenerator;
     }
 
+    private BiomeGroup getBiomeGroup(Map.Entry<String, String> entry)
+    {
+        String key = entry.getKey();
+        int start = key.indexOf('(');
+        int end = key.lastIndexOf(')');
+        BiomeGroup bg = null;
+        if (start != -1 && end != -1)
+        {
+            String rName = key.substring(0, start);
+            if (rName.equalsIgnoreCase("BiomeGroup")){
+                String[] props = StringHelper.readCommaSeperatedString(key.substring(start + 1, end));    
+                bg = new BiomeGroup(this, props);
+            }
+        }
+        return bg;
+    }
+    
+    //>>	This is ONLY for 1.7.2 style loading
+    private void ReadBiomeGroups()
+    {
+        boolean dry = false, lush = false, cold = false, snowy = false, ocean = false;
+        boolean mode_1_7_2 = this.biomeMode == TerrainControl.getBiomeModeManager().RELEASE_1_7_2;
+        //>>	Get default of present values
+        List<String> v1_6_4NormalGroup = readSettings(WorldStandardValues.NORMAL_BIOMES, mode_1_7_2 ? null : WorldStandardValues.NORMAL_BIOMES.getDefaultValue());
+        List<String> v1_6_4IceGroup = readSettings(WorldStandardValues.ICE_BIOMES, mode_1_7_2 ? null : WorldStandardValues.ICE_BIOMES.getDefaultValue());
+        //>>	Medium will map to the old NORMAL
+        if (v1_6_4NormalGroup != null && !v1_6_4NormalGroup.isEmpty())
+        {
+            this.biomeGroups.add(new BiomeGroup(this, WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName(), v1_6_4NormalGroup));
+        }
+        //>>	Cold will match to the old ICE
+        if (v1_6_4IceGroup != null && !v1_6_4IceGroup.isEmpty())
+        {
+            this.biomeGroups.add(new BiomeGroup(this, WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName(), v1_6_4IceGroup));
+        }
+
+        
+        for (Map.Entry<String, String> entry : this.settingsCache.entrySet())
+        {
+            BiomeGroup res = getBiomeGroup(entry);
+            if (res != null && res.getHolderType() != null)
+            {
+                this.biomeGroups.add(res);
+                //>>	if we are adding to the groups, check it off the list to add for defaults
+                if (res.getGroupName().equals(WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName()))
+                {
+                    lush = true;
+                } else if (res.getGroupName().equals(WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName()))
+                {
+                    cold = true;
+                } else if (mode_1_7_2)
+                {
+                    if (res.getGroupName().equals(WorldStandardValues.R1_7_2_DRY_WARM_BIOME_GROUP.getName()))
+                    {
+                        dry = true;
+                    } else if (res.getGroupName().equals(WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP.getName()))
+                    {
+                        snowy = true;
+                    } else if (res.getGroupName().equals(WorldStandardValues.R1_7_2_OCEAN_BIOME_GROUP.getName()))
+                    {
+                        ocean = true;
+                    }
+                }
+            }
+        }
+        //t>>	Kinda a messy and basic solution but we'll come back and clean things up
+        Setting<List<String>> stdgroup;
+        if (!lush)
+        {
+            stdgroup = mode_1_7_2 ? WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP : WorldStandardValues.NORMAL_BIOMES;
+            this.biomeGroups.add(new BiomeGroup(this, stdgroup.getName(), stdgroup.getDefaultValue()));
+        }
+        if (!cold)
+        {
+            stdgroup = mode_1_7_2 ? WorldStandardValues.R1_7_2_COLD_BIOME_GROUP : WorldStandardValues.ICE_BIOMES;
+            this.biomeGroups.add(new BiomeGroup(this, stdgroup.getName(), stdgroup.getDefaultValue()));
+        }
+        if (mode_1_7_2)
+        {
+            if (!dry)
+            {
+                stdgroup = WorldStandardValues.R1_7_2_DRY_WARM_BIOME_GROUP;
+                this.biomeGroups.add(new BiomeGroup(this, stdgroup.getName(), stdgroup.getDefaultValue()));
+            }
+            if (!snowy)
+            {
+                stdgroup = WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP;
+                this.biomeGroups.add(new BiomeGroup(this, stdgroup.getName(), stdgroup.getDefaultValue()));
+            }
+            if (!ocean)
+            {
+                stdgroup = WorldStandardValues.R1_7_2_OCEAN_BIOME_GROUP;
+                this.biomeGroups.add(new BiomeGroup(this, stdgroup.getName(), stdgroup.getDefaultValue()));
+            }
+        }
+            
+    }
+
     private void ReadCustomBiomes()
     {
 
@@ -488,7 +590,7 @@ public class WorldConfig extends ConfigFile
     protected void writeConfigSettings() throws IOException
     {
         // The modes
-        writeBigTitle("The modes");
+        writeBigTitle("The Modes");
         writeComment("What Terrain Control does with the config files.");
         writeComment("Possible modes: WriteAll, WriteWithoutComments, WriteDisable");
         writeComment("   WriteAll - default");
@@ -496,7 +598,7 @@ public class WorldConfig extends ConfigFile
         writeComment("   WriteDisable - doesn't write to the config files, it only reads. Doesn't auto-update the configs. Use with care!");
         writeValue(WorldStandardValues.SETTINGS_MODE, this.SettingsMode);
 
-        writeComment("Possible terrain modes: Normal, OldGenerator, TerrainTest, NotGenerate, Default");
+        writeComment("Possible terrain modes:");
         writeComment("   Normal - use all features");
         writeComment("   OldGenerator - generate land like Beta 1.7.3 generator");
         writeComment("   TerrainTest - generate only terrain without any resources");
@@ -504,8 +606,9 @@ public class WorldConfig extends ConfigFile
         writeComment("   Default - use default terrain generator");
         writeValue(WorldStandardValues.TERRAIN_MODE, this.ModeTerrain);
 
-        writeComment("Possible biome modes: Normal, OldGenerator, Default");
-        writeComment("   Normal - use all features");
+        writeComment("Possible biome modes:");
+        writeComment("   Release_1_7_2 - generate biome like the Release 1.7.2 generator");
+        writeComment("   Normal - generate biome like the Release 1.6.4 generator");
         writeComment("   FromImage - get biomes from image file");
         writeComment("   OldGenerator - generate biome like the Beta 1.7.3 generator");
         writeComment("   Default - use default Notch biome generator");
@@ -551,18 +654,18 @@ public class WorldConfig extends ConfigFile
 
         writeComment("Don't forget to register your custom biomes first in CustomBiomes!");
 
-        writeComment("Biomes generated normal way. Names are case sensitive.");
-        writeValue(WorldStandardValues.NORMAL_BIOMES, this.NormalBiomes);
+        // Biome Groups
+        writeSmallTitle("Biome Groups");
+        WriteBiomeGroups();
 
-        writeComment("Biomes generated in \"ice areas\". Names are case sensitive.");
-        writeValue(WorldStandardValues.ICE_BIOMES, this.IceBiomes);
-
+        
         writeComment("Biomes used as isles in other biomes. You must set IsleInBiome in biome config for each biome here. Biome name is case sensitive.");
         writeValue(WorldStandardValues.ISLE_BIOMES, this.IsleBiomes);
 
         writeComment("Biomes used as borders of other biomes. You must set BiomeIsBorder in biome config for each biome here. Biome name is case sensitive.");
         writeValue(WorldStandardValues.BORDER_BIOMES, this.BorderBiomes);
 
+        //>>	Biomes
         writeSmallTitle("Landmass settings (for NormalBiomes)");
 
         writeComment("Land rarity from 100 to 1. If you set smaller than 90 and LandSize near 0 beware Big oceans.");
@@ -833,7 +936,15 @@ public class WorldConfig extends ConfigFile
         writeValue(WorldStandardValues.MAX_TEMPERATURE, this.maxTemperature);
 
     }
-
+    
+    private void WriteBiomeGroups() throws IOException
+    {
+        for (BiomeGroup bg : this.biomeGroups)
+        {
+            this.writeFunction(bg);
+        }
+    }
+    
     private void WriteCustomBiomes() throws IOException
     {
         List<String> output = new ArrayList<String>();
