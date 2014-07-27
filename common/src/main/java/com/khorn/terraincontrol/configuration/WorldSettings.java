@@ -30,7 +30,7 @@ public class WorldSettings
 
     /**
      * Holds all biome configs. Generation Id => BiomeConfig
-     * 
+     * <p>
      * Must be simple array for fast access. Warning: some ids may contain
      * null values, always check.
      */
@@ -63,8 +63,9 @@ public class WorldSettings
 
         load();
     }
-    
-    private void load() {
+
+    private void load()
+    {
         // Establish folders
         List<File> biomeDirs = new ArrayList<File>(2);
         // TerrainControl/worlds/<WorldName>/<WorldBiomes/
@@ -85,7 +86,7 @@ public class WorldSettings
             String biomeName = entry.getKey();
             BiomeIds ids = entry.getValue();
             biomesToLoad.add(new BiomeLoadInstruction(biomeName, ids.getGenerationId(), new StandardBiomeTemplate(
-                    worldConfig.worldHeightScale)));
+                                                      worldConfig.worldHeightScale)));
         }
 
         // Load all files
@@ -98,14 +99,21 @@ public class WorldSettings
         // Save all settings
         saveSettings();
 
-        TerrainControl.log(LogMarker.INFO, "{} biomes Loaded", new Object[] {biomesCount});
-        TerrainControl.log(LogMarker.DEBUG, "{}", new Object[] {loadedBiomeNames});
+        TerrainControl.log(LogMarker.INFO, "{} biomes Loaded", new Object[]
+                       {
+                           biomesCount
+        });
+        TerrainControl.log(LogMarker.DEBUG, "{}", new Object[]
+                       {
+                           loadedBiomeNames
+        });
     }
-    
+
     /**
      * Reloads the settings from disk.
      */
-    public void reload() {
+    public void reload()
+    {
         // Clear biome collections
         Arrays.fill(this.biomes, null);
         this.savedBiomes.clear();
@@ -144,9 +152,10 @@ public class WorldSettings
 
             // Check generation id range
             int generationId = biomeConfig.generationId;
-            if (generationId < 0 || generationId >= world.getMaxBiomesCount()) {
-                TerrainControl.log(LogMarker.ERROR, "The biome id of the {} biome, {}, is too high. It must be between 0 and {}, inclusive.", 
-                        biomeConfig.name, generationId, world.getMaxBiomesCount() - 1);
+            if (generationId < 0 || generationId >= world.getMaxBiomesCount())
+            {
+                TerrainControl.log(LogMarker.ERROR, "The biome id of the {} biome, {}, is too high. It must be between 0 and {}, inclusive.",
+                                   biomeConfig.name, generationId, world.getMaxBiomesCount() - 1);
                 TerrainControl.log(LogMarker.ERROR, "The biome has been prevented from loading.");
                 continue;
             }
@@ -155,8 +164,11 @@ public class WorldSettings
             if (biomes[generationId] != null)
             {
                 TerrainControl.log(LogMarker.FATAL, "Duplicate biome id {} ({} and {})!", generationId, biomes[generationId].getName(),
-                        biomeConfig.name);
-                TerrainControl.log(LogMarker.FATAL, "The biome {} has been prevented from loading.", new Object[] {biomeConfig.name});
+                                   biomeConfig.name);
+                TerrainControl.log(LogMarker.FATAL, "The biome {} has been prevented from loading.", new Object[]
+                               {
+                                   biomeConfig.name
+                });
                 TerrainControl.log(LogMarker.INFO, "If you are updating an old pre-Minecraft 1.7 world, please read this wiki page:");
                 TerrainControl.log(LogMarker.INFO, "https://github.com/Wickth/TerrainControl/wiki/Upgrading-an-old-map-to-Minecraft-1.7");
                 continue;
@@ -172,7 +184,7 @@ public class WorldSettings
                 {
                     biomeConfig.replaceToBiomeName = "";
                     TerrainControl.log(LogMarker.WARN, "Invalid ReplaceToBiomeName in biome {}: biome {} doesn't exist", biomeConfig.name,
-                            biomeConfig.replaceToBiomeName);
+                                       biomeConfig.replaceToBiomeName);
                 } else
                 {
                     savedId = replaceToConfig.generationId;
@@ -180,9 +192,10 @@ public class WorldSettings
             }
 
             // Check saved id range
-            if (savedId >= world.getMaxSavedBiomesCount()) {
-                TerrainControl.log(LogMarker.ERROR, "Biomes with an id between {} and {} (inclusive) must have a valid ReplaceToBiomeName setting:", 
-                        world.getMaxBiomesCount(), world.getMaxSavedBiomesCount() - 1);
+            if (savedId >= world.getMaxSavedBiomesCount())
+            {
+                TerrainControl.log(LogMarker.ERROR, "Biomes with an id between {} and {} (inclusive) must have a valid ReplaceToBiomeName setting:",
+                                   world.getMaxBiomesCount(), world.getMaxSavedBiomesCount() - 1);
                 TerrainControl.log(LogMarker.ERROR, "Minecraft can only save biomes with an id between 0 and {}, inclusive.", world.getMaxBiomesCount() - 1);
                 TerrainControl.log(LogMarker.ERROR, "This means that the biome {} with map file id {} had to be prevented from loading.", biomeConfig.name, savedId);
                 continue;
@@ -205,13 +218,12 @@ public class WorldSettings
             }
 
             // Indexing BiomeRarity
-            if (this.worldConfig.NormalBiomes.contains(biomeConfig.name))
+            for (BiomeGroup entry : this.worldConfig.biomeGroups)
             {
-                this.worldConfig.normalBiomesRarity += biomeConfig.biomeRarity;
-            }
-            if (this.worldConfig.IceBiomes.contains(biomeConfig.name))
-            {
-                this.worldConfig.iceBiomesRarity += biomeConfig.biomeRarity;
+                if (entry.contains(biomeConfig.name))
+                {
+                    entry.alterRarity(biomeConfig.biomeRarity);
+                }
             }
 
             // Indexing MaxSmoothRadius
@@ -275,8 +287,9 @@ public class WorldSettings
         BiomeConfig extendedBiomeConfig = allBiomeConfigs.get(extendedBiomeName);
         if (extendedBiomeConfig == null)
         {
-            TerrainControl.log(LogMarker.WARN, "The biome {} tried to extend the biome {}, but that biome doesn't exist.", new Object[] {
-                    biomeConfig.name, extendedBiomeName});
+            TerrainControl.log(LogMarker.WARN, 
+                               "The biome {} tried to extend the biome {}, but that biome doesn't exist.",
+                               new Object[]{ biomeConfig.name, extendedBiomeName });
             return;
         }
 
@@ -284,8 +297,8 @@ public class WorldSettings
         if (currentDepth > MAX_INHERITANCE_DEPTH)
         {
             TerrainControl.log(LogMarker.FATAL,
-                    "The biome {} cannot extend the biome {} - too much configs processed already! Cyclical inheritance?", new Object[] {
-                            biomeConfig.name, extendedBiomeConfig.name});
+                               "The biome {} cannot extend the biome {} - too much configs processed already! Cyclical inheritance?",
+                               new Object[]{ biomeConfig.name, extendedBiomeConfig.name });
         }
 
         if (!extendedBiomeConfig.biomeExtendsProcessed)
@@ -356,7 +369,7 @@ public class WorldSettings
             {
                 TerrainControl.log(LogMarker.WARN, "========================");
                 TerrainControl.log(LogMarker.WARN, "Fould old `BiomeConfigs` folder, but it could not be renamed to `", biomeFolderName,
-                        "`!");
+                                   "`!");
                 TerrainControl.log(LogMarker.WARN, "Please rename the folder manually.");
                 TerrainControl.log(LogMarker.WARN, "========================");
                 biomeFolderName = "BiomeConfigs";

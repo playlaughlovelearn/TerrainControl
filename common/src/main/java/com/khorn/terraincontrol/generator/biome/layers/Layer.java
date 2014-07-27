@@ -1,6 +1,5 @@
 package com.khorn.terraincontrol.generator.biome.layers;
 
-
 import com.khorn.terraincontrol.LocalBiome;
 import com.khorn.terraincontrol.LocalWorld;
 import com.khorn.terraincontrol.TerrainControl;
@@ -18,48 +17,50 @@ import java.util.Map.Entry;
 
 public abstract class Layer
 {
+
     protected long b;
     protected Layer child;
     private long c;
     protected long d;
 
     /*
-    LayerIsland - chance to big land
-    LayerLandRandom - a(3) - chance to increase big land
-    GenLayerIcePlains - chance to ice
-    GenLayerMushroomIsland - chance to mushroom island
-
-    biome:
-    1) is island
-    2) size
-    3) chance
-    4) is shore
-    5) color
-    6) temperature
-    7) downfall
-    8) is snow biome
-    9) Have rivers
-
-    world
-    1) chance to lands
-    2) size of big lands
-    3) chance to increase lands
-    4) Chance for ice area
-    5) Ice area size
-    6) Rivers
-    7) Rivers size
-    */
-
+     * LayerIsland - chance to big land
+     * LayerLandRandom - a(3) - chance to increase big land
+     * GenLayerIcePlains - chance to ice
+     * GenLayerMushroomIsland - chance to mushroom island
+     *
+     * biome:
+     * 1) is island
+     * 2) size
+     * 3) chance
+     * 4) is shore
+     * 5) color
+     * 6) temperature
+     * 7) downfall
+     * 8) is snow biome
+     * 9) Have rivers
+     *
+     * world
+     * 1) chance to lands
+     * 2) size of big lands
+     * 3) chance to increase lands
+     * 4) Chance for ice area
+     * 5) Ice area size
+     * 6) Rivers
+     * 7) Rivers size
+     */
     protected static final int BiomeBits = 1023;            //>>	1st-10th Bits           // 255 63
     protected static final int LandBit = 1 << 10;           //>>	11th Bit, 1024          // 256 64
+    
     protected static final int BiomeGroupShift = 11;        //>>	Shift amount for biome group data
-                                                            //>>	12th-18th Bits, 260096
-    protected static final int BiomeGroupBits = 127 << BiomeGroupShift;
+    //>>	12th-18th Bits, 260096
+    protected static final int BiomeGroupBits = 127 << BiomeGroupShift; //>>	8 Biomes per Group Avg. Sounds reasonable
+    
     protected static final int RiverShift = 18;
     protected static final int RiverBits = 3 << RiverShift;         //>>	19th-20th Bits, 786432  //3072 768
     protected static final int RiverBitOne = 1 << RiverShift;       //>>	19th Bit, 262144
-    protected static final int RiverBitTwo = (1 << RiverShift+1);       //>>	20th Bit, 524288
-//    protected static final int IceBit = 2048;                                               // 512  128
+    protected static final int RiverBitTwo = 1 << (RiverShift + 1);       //>>	20th Bit, 524288
+    
     protected static final int IslandBit = 1 << 20;         //>>	21st Bit, 1048576       // 4096 1024
 
     protected static int GetBiomeFromLayer(int BiomeAndLand)
@@ -73,19 +74,20 @@ public abstract class Layer
     {
 
         /*
-        int BigLandSize = 2;  //default 0, more - smaller
-        int ChanceToIncreaseLand = 6; //default 4
-        int MaxDepth = 10;
+         * int BigLandSize = 2; //default 0, more - smaller
+         * int ChanceToIncreaseLand = 6; //default 4
+         * int MaxDepth = 10;
          */
-
         WorldSettings configs = world.getSettings();
         WorldConfig worldConfig = configs.worldConfig;
 
         Map<String, LocalBiome[][]> GroupBiomeMap = new HashMap<String, LocalBiome[][]>();
         //>>	Init GroupBiomeMap
+        Map<String, Integer> BiomeGroupRarity = new HashMap<String, Integer>();
         for (BiomeGroup group : worldConfig.biomeGroups)
         {
-            GroupBiomeMap.put(group.getGroupName(), new LocalBiome[worldConfig.GenerationDepth + 1][]);
+            GroupBiomeMap.put(group.getName(), new LocalBiome[worldConfig.GenerationDepth + 1][]);
+            BiomeGroupRarity.put(group.getName(), group.getRarity());
         }
 
         for (int i = 0; i < worldConfig.GenerationDepth + 1; i++)
@@ -94,7 +96,7 @@ public abstract class Layer
             //>>	Init BiomeGroups
             for (BiomeGroup group : worldConfig.biomeGroups)
             {
-                BiomeGroups.put(group.getGroupName(), new ArrayList<LocalBiome>(8));
+                BiomeGroups.put(group.getName(), new ArrayList<LocalBiome>(8));
             }
             //>>	Place biomes in BiomeGroups
             for (LocalBiome biome : configs.biomes)
@@ -106,40 +108,43 @@ public abstract class Layer
 
                 if (biomeConfig.biomeSize != i)
                     continue;
+                // 
                 for (BiomeGroup group : worldConfig.biomeGroups)
                 {
-                    if (group.getBiomesInGroup().contains(biomeConfig.name))
+                    if (group.contains(biomeConfig.name))
                     {
                         for (int t = 0; t < biomeConfig.biomeRarity; t++)
-                            BiomeGroups.get(group.getGroupName()).add(biome);
-                        worldConfig.normalBiomesRarity -= biomeConfig.biomeRarity;
+                        {
+                            BiomeGroups.get(group.getName()).add(biome);
+                        }
+                        group.alterRarity(-biomeConfig.biomeRarity);
                     }
                 }
             }
 
-            for (String key : GroupBiomeMap.keySet())
+            for (Entry<String, LocalBiome[][]> entry : GroupBiomeMap.entrySet())
             {
-                LocalBiome[][] GroupLocalBiomes = GroupBiomeMap.get(key);
+                LocalBiome[][] GroupLocalBiomes = entry.getValue();
                 if (GroupLocalBiomes != null)
                 {
-                    ArrayList<LocalBiome> bgs = BiomeGroups.get(key);
+                    ArrayList<LocalBiome> bgs = BiomeGroups.get(entry.getKey());
                     if (!bgs.isEmpty())
                     {
-                        GroupLocalBiomes[i] = bgs.toArray(new LocalBiome[bgs.size() + worldConfig.normalBiomesRarity]);
+                        GroupLocalBiomes[i] = bgs.toArray(new LocalBiome[bgs.size() + BiomeGroupRarity.get(entry.getKey())]);
+                        entry.setValue(GroupLocalBiomes);
                     } else
                     {
                         GroupLocalBiomes[i] = new LocalBiome[0];
+                        entry.setValue(GroupLocalBiomes);
                     }
                 }
             }
         }
 
-
         Layer MainLayer = new LayerEmpty(1L);
 
         Layer RiverLayer = new LayerEmpty(1L);
         boolean riversStarted = false;
-
 
         for (int depth = 0; depth <= worldConfig.GenerationDepth; depth++)
         {
@@ -164,9 +169,7 @@ public abstract class Layer
             {
                 LocalBiome[][] localBiomes = entry.getValue();
                 int len = localBiomes[depth].length;
-                if (len != 0){
-                    nez = true;
-                }
+                if (len != 0){ nez = true; }
                 biomesForLayer.put(entry.getKey(), localBiomes[depth]);
             }
             if (nez)
@@ -174,7 +177,6 @@ public abstract class Layer
                 LayerBiome layerBiome = new LayerBiome(200, MainLayer, biomesForLayer);
                 MainLayer = layerBiome;
             }
-
 
             if (worldConfig.IceSize == depth)
                 MainLayer = new LayerIce(depth, MainLayer, worldConfig.IceRarity);
@@ -186,7 +188,6 @@ public abstract class Layer
                     riversStarted = true;
                 } else
                     MainLayer = new LayerRiverInit(155, MainLayer);
-
 
             if ((worldConfig.GenerationDepth - worldConfig.riverSize) == depth)
             {
@@ -238,13 +239,11 @@ public abstract class Layer
                 }
             }
 
-
             if (haveBorder)
             {
                 layerBiomeBorder.child = MainLayer;
                 MainLayer = layerBiomeBorder;
             }
-
 
         }
         if (worldConfig.randomRivers)
@@ -262,7 +261,6 @@ public abstract class Layer
             else
                 MainLayer = new LayerFromImage(1L, null, worldConfig, world);
         }
-
 
         Layer ZoomedLayer = new LayerZoomVoronoi(10L, MainLayer);
 

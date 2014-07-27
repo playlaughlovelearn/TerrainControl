@@ -18,8 +18,10 @@ import java.util.logging.Logger;
  */
 public class BiomeGroup extends ConfigFunction<WorldConfig>
 {
-    private String groupName;
-    private List<String> biomesInGroup = new LinkedList<String>();
+
+    private String name;
+    private List<String> biomes = new LinkedList<String>();
+    private int rarity;
 
     public BiomeGroup(WorldConfig config, String[] args)
     {
@@ -32,27 +34,26 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
             Logger.getLogger(BiomeGroup.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public BiomeGroup(WorldConfig config, String groupName, List<String> biomes)
     {
         this.setHolder(config);
-        this.biomesInGroup = filterBiomes(biomes);
-        this.groupName = groupName;
+        this.biomes = filterBiomes(biomes);
+        this.name = groupName;
         this.setValid(true);
     }
-    
+
     @Override
     protected void load(List<String> args) throws InvalidConfigException
     {
         //>>	Must have atleast a GroupName and a Biome that belongs to it
         assureSize(2, args);
 
-        groupName = args.get(0);
-        biomesInGroup = filterBiomes(readBiomes(args,1));
+        name = args.get(0);
+        biomes = filterBiomes(readBiomes(args, 1));
         this.setValid(true);
     }
-    
-    
+
     @Override
     public Class<WorldConfig> getHolderType()
     {
@@ -62,7 +63,7 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
     @Override
     public String makeString()
     {
-        return "BiomeGroup(" + groupName + ", " + StringHelper.join(biomesInGroup, ", ") + ")";
+        return "BiomeGroup(" + name + ", " + StringHelper.join(biomes, ", ") + ")";
     }
 
     protected ArrayList<String> filterBiomes(List<String> biomes)
@@ -83,8 +84,8 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
 
         }
         return output;
-    }    
-    
+    }
+
     /**
      * Reads all biomes from the start position until the end of the
      * list.
@@ -108,14 +109,36 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
         return biomes;
     }
 
-    public String getGroupName()
+    public String getName()
     {
-        return groupName;
+        return name;
     }
 
-    public List<String> getBiomesInGroup()
+    public int alterRarity(int alterBy)
     {
-        return Collections.unmodifiableList(biomesInGroup);
+        this.rarity += alterBy;
+        return this.rarity;
     }
-    
+
+    public int getRarity()
+    {
+        return this.rarity;
+    }
+
+    public List<String> getBiomes()
+    {
+        return Collections.unmodifiableList(biomes);
+    }
+
+    public boolean contains(String name)
+    {
+        for (ListIterator<String> it = this.biomes.listIterator(); it.hasNext();)
+        {
+            String biome = it.next();
+            if (biome.equals(name))
+                return true;
+        }
+        return false;
+    }
+
 }

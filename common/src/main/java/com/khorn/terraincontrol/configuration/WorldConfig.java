@@ -164,9 +164,6 @@ public class WorldConfig extends ConfigFile
 
     public boolean BiomeConfigsHaveReplacement = false;
 
-    public int normalBiomesRarity;
-    public int iceBiomesRarity;
-
     public int worldHeightScaleBits;
     public int worldHeightScale;
     public int worldHeightCapBits;
@@ -499,21 +496,21 @@ public class WorldConfig extends ConfigFile
             {
                 this.biomeGroups.add(res);
                 //>>	if we are adding to the groups, check it off the list to add for defaults
-                if (res.getGroupName().equals(WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName()))
+                if (res.getName().equals(WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName()))
                 {
                     lush = true;
-                } else if (res.getGroupName().equals(WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName()))
+                } else if (res.getName().equals(WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName()))
                 {
                     cold = true;
                 } else if (mode_1_7_2)
                 {
-                    if (res.getGroupName().equals(WorldStandardValues.R1_7_2_DRY_WARM_BIOME_GROUP.getName()))
+                    if (res.getName().equals(WorldStandardValues.R1_7_2_DRY_WARM_BIOME_GROUP.getName()))
                     {
                         dry = true;
-                    } else if (res.getGroupName().equals(WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP.getName()))
+                    } else if (res.getName().equals(WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP.getName()))
                     {
                         snowy = true;
-                    } else if (res.getGroupName().equals(WorldStandardValues.R1_7_2_OCEAN_BIOME_GROUP.getName()))
+                    } else if (res.getName().equals(WorldStandardValues.R1_7_2_OCEAN_BIOME_GROUP.getName()))
                     {
                         ocean = true;
                     }
