@@ -3,6 +3,7 @@ package com.khorn.terraincontrol.generator.biome.layers;
 import com.khorn.terraincontrol.LocalBiome;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class LayerBiome extends Layer
 {
@@ -31,19 +32,18 @@ public class LayerBiome extends Layer
                 SetSeed(j + x, i + z);
                 int currentPiece = arrayOfInt1[(j + i * x_size)];
 
-
                 if ((currentPiece & BiomeBits) == 0)    // without biome
                 {
-                    if (this.biomes.length > 0 && (currentPiece & IceBit) == 0) // Normal Biome
+                    for (Entry<String, LocalBiome[]> entry : biomes.entrySet())
                     {
-                        LocalBiome biome = this.biomes[nextInt(this.biomes.length)];
-                        if (biome != null)
-                            currentPiece |= biome.getIds().getGenerationId();
-                    } else if (this.ice_biomes.length > 0 && (currentPiece & IceBit) != 0) //Ice biome
-                    {
-                        LocalBiome biome = this.ice_biomes[nextInt(this.ice_biomes.length)];
-                        if (biome != null)
-                            currentPiece |= biome.getIds().getGenerationId();
+//                        String string = entry.getKey();
+                        LocalBiome[] localBiomes = entry.getValue();
+                        if (this.biomes.length > 0 && (currentPiece & IceBit) == 0)
+                        {
+                            LocalBiome biome = localBiomes[nextInt(localBiomes.length)];
+                            if (biome != null)
+                                currentPiece |= biome.getIds().getGenerationId();
+                        }
                     }
                 }
 

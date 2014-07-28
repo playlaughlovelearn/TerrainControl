@@ -6,9 +6,11 @@ import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,9 +21,10 @@ import java.util.logging.Logger;
 public class BiomeGroup extends ConfigFunction<WorldConfig>
 {
 
+    private static int groupCount = 0;
+    private static Map<String, Integer> groupids = new HashMap<String, Integer>(4);
     private String name;
     private List<String> biomes = new LinkedList<String>();
-    private int rarity;
 
     public BiomeGroup(WorldConfig config, String[] args)
     {
@@ -40,6 +43,7 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
         this.setHolder(config);
         this.biomes = filterBiomes(biomes);
         this.name = groupName;
+        groupids.put(this.name, ++groupCount);
         this.setValid(true);
     }
 
@@ -48,7 +52,6 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
     {
         //>>	Must have atleast a GroupName and a Biome that belongs to it
         assureSize(2, args);
-
         name = args.get(0);
         biomes = filterBiomes(readBiomes(args, 1));
         this.setValid(true);
