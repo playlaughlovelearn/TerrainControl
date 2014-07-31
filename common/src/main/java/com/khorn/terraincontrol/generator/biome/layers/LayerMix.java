@@ -64,7 +64,7 @@ public class LayerMix extends Layer
 
                 if ((currentPiece & LandBit) != 0)
                     cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
+                else if (worldConfig.FrozenOcean)
                     cachedId = DefaultBiome.FROZEN_OCEAN.Id;
                 else
                     cachedId = DefaultBiome.OCEAN.Id;
@@ -97,7 +97,7 @@ public class LayerMix extends Layer
 
                 if ((currentPiece & LandBit) != 0)
                     cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
+                else if (worldConfig.FrozenOcean)
                     cachedId = DefaultBiome.FROZEN_OCEAN.Id;
                 else
                     cachedId = DefaultBiome.OCEAN.Id;
@@ -127,7 +127,7 @@ public class LayerMix extends Layer
 
                 if ((currentPiece & LandBit) != 0)
                     cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
+                else if (worldConfig.FrozenOcean)
                     cachedId = DefaultBiome.FROZEN_OCEAN.Id;
                 else
                     cachedId = DefaultBiome.OCEAN.Id;

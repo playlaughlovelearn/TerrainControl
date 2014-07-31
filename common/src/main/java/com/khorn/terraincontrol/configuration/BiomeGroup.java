@@ -1,29 +1,31 @@
 package com.khorn.terraincontrol.configuration;
 
+import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.exception.InvalidConfigException;
+import com.khorn.terraincontrol.logging.LogMarker;
 import com.khorn.terraincontrol.util.helpers.StringHelper;
 import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Represents a Resource: something that can generate in the world.
+ * <p>
+ * @TODO get class to enforce global group max restriction
  */
 public class BiomeGroup extends ConfigFunction<WorldConfig>
 {
 
-    private static int groupCount = 0;
-    private static Map<String, Integer> groupids = new HashMap<String, Integer>(4);
+    private int groupid;
     private String name;
+    private int rarity;
     private List<String> biomes = new LinkedList<String>();
 
     public BiomeGroup(WorldConfig config, String[] args)
@@ -36,6 +38,7 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
         {
             Logger.getLogger(BiomeGroup.class.getName()).log(Level.SEVERE, null, ex);
         }
+        TerrainControl.log(LogMarker.INFO, "   Arg-Included: `{}` ", StringHelper.join(biomes, ", "));
     }
 
     public BiomeGroup(WorldConfig config, String groupName, List<String> biomes)
@@ -43,8 +46,8 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
         this.setHolder(config);
         this.biomes = filterBiomes(biomes);
         this.name = groupName;
-        groupids.put(this.name, ++groupCount);
         this.setValid(true);
+        TerrainControl.log(LogMarker.INFO, "   Man-Included: `{}` ", StringHelper.join(biomes, ", "));
     }
 
     @Override
@@ -71,7 +74,7 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
 
     protected ArrayList<String> filterBiomes(List<String> biomes)
     {
-        ArrayList<String> output = new ArrayList<String>();
+        ArrayList<String> output = new ArrayList<String>(32);
         Set<String> customBiomes = this.getHolder().CustomBiomeIds.keySet();
         for (String key : biomes)
         {
@@ -104,12 +107,12 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
      */
     protected List<String> readBiomes(List<String> strings, int start) throws InvalidConfigException
     {
-        List<String> biomes = new LinkedList<String>();
+        List<String> readBiomes = new LinkedList<String>();
         for (ListIterator<String> it = strings.listIterator(start); it.hasNext();)
         {
-            biomes.add(it.next());
+            readBiomes.add(it.next());
         }
-        return biomes;
+        return readBiomes;
     }
 
     public String getName()
@@ -142,6 +145,20 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
                 return true;
         }
         return false;
+    }
+
+    public void setGroupid(int groupid)
+    {
+        if (groupid <= BiomeGroupManager.MAX_BIOME_GROUP_COUNT)
+        {
+            this.groupid = groupid;
+        } else {
+            this.groupid = -1;
+        }
+    }
+    
+    public int getGroupid(){
+        return this.groupid;
     }
 
 }

@@ -28,13 +28,13 @@ public class WorldConfig extends ConfigFile
         }
     };
 
-    public Map<String, BiomeIds> CustomBiomeIds = new HashMap<String, BiomeIds>();
+    public Map<String, BiomeIds> CustomBiomeIds = new HashMap<String, BiomeIds>(32);
 
     // Holds all world CustomObjects.
     public List<CustomObject> customObjects = new ArrayList<CustomObject>();
 
     //>>	For Biome Groups
-    public List<BiomeGroup> biomeGroups = new ArrayList<BiomeGroup>();
+    public BiomeGroupManager biomeGroupManager = new BiomeGroupManager();
     //>>	For Special Biome Association
     public List<String> IsleBiomes = new ArrayList<String>();
     public List<String> BorderBiomes = new ArrayList<String>();
@@ -463,39 +463,40 @@ public class WorldConfig extends ConfigFile
             String rName = key.substring(0, start);
             if (rName.equalsIgnoreCase("BiomeGroup")){
                 String[] props = StringHelper.readCommaSeperatedString(key.substring(start + 1, end));    
-                bg = new BiomeGroup(this, props);
+                bg = this.biomeGroupManager.registerGroup(this, props);
             }
         }
         return bg;
     }
     
-    //>>	This is ONLY for 1.7.2 style loading
     private void ReadBiomeGroups()
     {
         boolean dry = false, lush = false, cold = false, snowy = false, ocean = false;
         boolean mode_1_7_2 = this.biomeMode == TerrainControl.getBiomeModeManager().RELEASE_1_7_2;
+        
+    //>>	POPULATE WITH DEFAULTS
         //>>	Get default of present values
         List<String> v1_6_4NormalGroup = readSettings(WorldStandardValues.NORMAL_BIOMES, mode_1_7_2 ? null : WorldStandardValues.NORMAL_BIOMES.getDefaultValue());
         List<String> v1_6_4IceGroup = readSettings(WorldStandardValues.ICE_BIOMES, mode_1_7_2 ? null : WorldStandardValues.ICE_BIOMES.getDefaultValue());
         //>>	Medium will map to the old NORMAL
         if (v1_6_4NormalGroup != null && !v1_6_4NormalGroup.isEmpty())
         {
-            this.biomeGroups.add(new BiomeGroup(this, WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName(), v1_6_4NormalGroup));
+            this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName(), v1_6_4NormalGroup);
         }
         //>>	Cold will match to the old ICE
         if (v1_6_4IceGroup != null && !v1_6_4IceGroup.isEmpty())
         {
-            this.biomeGroups.add(new BiomeGroup(this, WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName(), v1_6_4IceGroup));
+            this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName(), v1_6_4IceGroup);
         }
+    //>>	END: POPULATE WITH DEFAULTS
 
-        
+    //>>	SCAN FOR CONFIG ENTRIES
         for (Map.Entry<String, String> entry : this.settingsCache.entrySet())
         {
             BiomeGroup res = getBiomeGroup(entry);
             if (res != null && res.getHolderType() != null)
             {
-                this.biomeGroups.add(res);
-                //>>	if we are adding to the groups, check it off the list to add for defaults
+                //>>	if we added to the groups, check it off the list to add for defaults
                 if (res.getName().equals(WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName()))
                 {
                     lush = true;
@@ -517,37 +518,36 @@ public class WorldConfig extends ConfigFile
                 }
             }
         }
+    //>>	END: SCAN FOR CONFIG ENTRIES
         //t>>	Kinda a messy and basic solution but we'll come back and clean things up
-        Setting<List<String>> stdgroup;
+        List<Setting<List<String>>> groupsToAdd = new ArrayList<Setting<List<String>>>(8);
         if (!lush)
         {
-            stdgroup = mode_1_7_2 ? WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP : WorldStandardValues.NORMAL_BIOMES;
-            this.biomeGroups.add(new BiomeGroup(this, stdgroup.getName(), stdgroup.getDefaultValue()));
+            groupsToAdd.add(mode_1_7_2 ? WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP : WorldStandardValues.NORMAL_BIOMES);
         }
         if (!cold)
         {
-            stdgroup = mode_1_7_2 ? WorldStandardValues.R1_7_2_COLD_BIOME_GROUP : WorldStandardValues.ICE_BIOMES;
-            this.biomeGroups.add(new BiomeGroup(this, stdgroup.getName(), stdgroup.getDefaultValue()));
+            groupsToAdd.add(mode_1_7_2 ? WorldStandardValues.R1_7_2_COLD_BIOME_GROUP : WorldStandardValues.ICE_BIOMES);
         }
         if (mode_1_7_2)
         {
             if (!dry)
             {
-                stdgroup = WorldStandardValues.R1_7_2_DRY_WARM_BIOME_GROUP;
-                this.biomeGroups.add(new BiomeGroup(this, stdgroup.getName(), stdgroup.getDefaultValue()));
+                groupsToAdd.add(WorldStandardValues.R1_7_2_DRY_WARM_BIOME_GROUP);
             }
             if (!snowy)
             {
-                stdgroup = WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP;
-                this.biomeGroups.add(new BiomeGroup(this, stdgroup.getName(), stdgroup.getDefaultValue()));
+                groupsToAdd.add(WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP);
             }
             if (!ocean)
             {
-                stdgroup = WorldStandardValues.R1_7_2_OCEAN_BIOME_GROUP;
-                this.biomeGroups.add(new BiomeGroup(this, stdgroup.getName(), stdgroup.getDefaultValue()));
+                groupsToAdd.add(WorldStandardValues.R1_7_2_OCEAN_BIOME_GROUP);
             }
         }
-            
+        for (Setting<List<String>> group : groupsToAdd)
+        {
+            this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue());
+        }
     }
 
     private void ReadCustomBiomes()
@@ -936,7 +936,7 @@ public class WorldConfig extends ConfigFile
     
     private void WriteBiomeGroups() throws IOException
     {
-        for (BiomeGroup bg : this.biomeGroups)
+        for (BiomeGroup bg : this.biomeGroupManager.getGroups())
         {
             this.writeFunction(bg);
         }

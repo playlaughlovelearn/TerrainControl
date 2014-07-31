@@ -1,22 +1,25 @@
 package com.khorn.terraincontrol.generator.biome.layers;
 
 import com.khorn.terraincontrol.LocalBiome;
+import com.khorn.terraincontrol.TerrainControl;
+import com.khorn.terraincontrol.configuration.BiomeGroup;
+import com.khorn.terraincontrol.configuration.BiomeGroupManager;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
+import com.khorn.terraincontrol.logging.LogMarker;
 import java.util.Map;
-import java.util.Map.Entry;
 
 public class LayerBiome extends Layer
 {
+
     public Map<String, LocalBiome[]> biomes;
-//    public LocalBiome[] biomes;
-//    public LocalBiome[] ice_biomes;
+    private BiomeGroupManager biomeGroupManager;
 
-
-    public LayerBiome(long paramLong, Layer paramGenLayer, Map<String, LocalBiome[]> biomesForLayer)
+    public LayerBiome(long paramLong, Layer paramGenLayer, Map<String, LocalBiome[]> biomesForLayer, BiomeGroupManager biomeGroupManager)
     {
         super(paramLong);
         this.child = paramGenLayer;
         this.biomes = biomesForLayer;
+        this.biomeGroupManager = biomeGroupManager;
     }
 
     @Override
@@ -32,27 +35,24 @@ public class LayerBiome extends Layer
                 SetSeed(j + x, i + z);
                 int currentPiece = arrayOfInt1[(j + i * x_size)];
 
-                if ((currentPiece & BiomeBits) == 0)    // without biome
+                if ((currentPiece & BiomeBits) == 0 && (currentPiece & BiomeGroupBits) != 0)    // without biome but has biome group
                 {
-                    for (Entry<String, LocalBiome[]> entry : biomes.entrySet())
+                    BiomeGroup group = biomeGroupManager.getGroup((currentPiece & BiomeGroupBits) >> BiomeGroupShift);
+                    LocalBiome[] localBiomes = biomes.get(group.getName());
+                    if (localBiomes.length > 0)
                     {
-//                        String string = entry.getKey();
-                        LocalBiome[] localBiomes = entry.getValue();
-                        if (this.biomes.length > 0 && (currentPiece & IceBit) == 0)
-                        {
-                            LocalBiome biome = localBiomes[nextInt(localBiomes.length)];
-                            if (biome != null)
-                                currentPiece |= biome.getIds().getGenerationId();
-                        }
+                        LocalBiome biome = localBiomes[nextInt(localBiomes.length)];
+                        if (biome != null)
+                            currentPiece |= biome.getIds().getGenerationId();
+                        else
+                            TerrainControl.log(LogMarker.INFO, "Group Biome Bits Failed: `{}`->`{}`", Integer.toBinaryString(currentPiece), (currentPiece & BiomeGroupBits) >> BiomeGroupShift);
                     }
                 }
-
                 arrayOfInt2[(j + i * x_size)] = currentPiece;
-
-
             }
         }
 
         return arrayOfInt2;
     }
+
 }

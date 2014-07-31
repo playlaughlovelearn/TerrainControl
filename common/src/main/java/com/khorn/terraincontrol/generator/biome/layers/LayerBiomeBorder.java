@@ -54,7 +54,7 @@ public class LayerBiomeBorder extends Layer
                     boolean[] biomeFrom = BordersFrom[biomeId];
                     if (biomeFrom[i1] && biomeFrom[i2] && biomeFrom[i3] && biomeFrom[i4])
                         if ((i1 != biomeId) || (i2 != biomeId) || (i3 != biomeId) || (i4 != biomeId))
-                            currentPiece = (currentPiece & (IslandBit | RiverBits | IceBit)) | LandBit | BordersTo[biomeId];
+                            currentPiece = (currentPiece & (IslandBit | RiverBits)) | LandBit | BordersTo[biomeId];
                 }
 
                 arrayOfInt2[(j + i * x_size)] = currentPiece;

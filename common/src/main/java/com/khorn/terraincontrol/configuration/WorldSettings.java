@@ -218,7 +218,7 @@ public class WorldSettings
             }
 
             // Indexing BiomeRarity
-            for (BiomeGroup entry : this.worldConfig.biomeGroups)
+            for (BiomeGroup entry : this.worldConfig.biomeGroupManager.getGroups())
             {
                 if (entry.contains(biomeConfig.name))
                 {

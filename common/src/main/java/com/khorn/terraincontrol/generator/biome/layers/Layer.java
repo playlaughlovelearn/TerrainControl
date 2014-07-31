@@ -50,18 +50,18 @@ public abstract class Layer
      * 7) Rivers size
      */
     protected static final int BiomeBits = 1023;            //>>	1st-10th Bits           // 255 63
-    protected static final int LandBit = 1 << 10;           //>>	11th Bit, 1024          // 256 64
+    protected static final int LandBit = (1 << 10);           //>>	11th Bit, 1024          // 256 64
     
     protected static final int BiomeGroupShift = 11;        //>>	Shift amount for biome group data
     //>>	12th-18th Bits, 260096
-    protected static final int BiomeGroupBits = 127 << BiomeGroupShift; //>>	8 Biomes per Group Avg. Sounds reasonable
+    protected static final int BiomeGroupBits = (127 << BiomeGroupShift); //>>	8 Biomes per Group Avg. Sounds reasonable
     
     protected static final int RiverShift = 18;
-    protected static final int RiverBits = 3 << RiverShift;         //>>	19th-20th Bits, 786432  //3072 768
-    protected static final int RiverBitOne = 1 << RiverShift;       //>>	19th Bit, 262144
-    protected static final int RiverBitTwo = 1 << (RiverShift + 1);       //>>	20th Bit, 524288
+    protected static final int RiverBits = (3 << RiverShift);         //>>	19th-20th Bits, 786432  //3072 768
+    protected static final int RiverBitOne = (1 << RiverShift);       //>>	19th Bit, 262144
+    protected static final int RiverBitTwo = (1 << (RiverShift + 1));       //>>	20th Bit, 524288
     
-    protected static final int IslandBit = 1 << 20;         //>>	21st Bit, 1048576       // 4096 1024
+    protected static final int IslandBit = (1 << 20);         //>>	21st Bit, 1048576       // 4096 1024
 
     protected static int GetBiomeFromLayer(int BiomeAndLand)
     {
@@ -84,7 +84,7 @@ public abstract class Layer
         Map<String, LocalBiome[][]> GroupBiomeMap = new HashMap<String, LocalBiome[][]>();
         //>>	Init GroupBiomeMap
         Map<String, Integer> BiomeGroupRarity = new HashMap<String, Integer>();
-        for (BiomeGroup group : worldConfig.biomeGroups)
+        for (BiomeGroup group : worldConfig.biomeGroupManager.getGroups())
         {
             GroupBiomeMap.put(group.getName(), new LocalBiome[worldConfig.GenerationDepth + 1][]);
             BiomeGroupRarity.put(group.getName(), group.getRarity());
@@ -94,7 +94,7 @@ public abstract class Layer
         {
             Map<String, ArrayList<LocalBiome>> BiomeGroups = new HashMap<String, ArrayList<LocalBiome>>();
             //>>	Init BiomeGroups
-            for (BiomeGroup group : worldConfig.biomeGroups)
+            for (BiomeGroup group : worldConfig.biomeGroupManager.getGroups())
             {
                 BiomeGroups.put(group.getName(), new ArrayList<LocalBiome>(8));
             }
@@ -109,7 +109,7 @@ public abstract class Layer
                 if (biomeConfig.biomeSize != i)
                     continue;
                 // 
-                for (BiomeGroup group : worldConfig.biomeGroups)
+                for (BiomeGroup group : worldConfig.biomeGroupManager.getGroups())
                 {
                     if (group.contains(biomeConfig.name))
                     {
@@ -162,9 +162,11 @@ public abstract class Layer
 
             if (depth < (worldConfig.LandSize + worldConfig.LandFuzzy))
                 MainLayer = new LayerLandRandom(depth, MainLayer);
-
+            
+            MainLayer = new LayerBiomeGroups(35L, MainLayer, worldConfig.biomeGroupManager);
+            
             boolean nez = false;
-            Map<String, LocalBiome[]> biomesForLayer = new HashMap<>(4);
+            Map<String, LocalBiome[]> biomesForLayer = new HashMap<String, LocalBiome[]>(4);
             for (Entry<String, LocalBiome[][]> entry : GroupBiomeMap.entrySet())
             {
                 LocalBiome[][] localBiomes = entry.getValue();
@@ -174,12 +176,12 @@ public abstract class Layer
             }
             if (nez)
             {
-                LayerBiome layerBiome = new LayerBiome(200, MainLayer, biomesForLayer);
+                LayerBiome layerBiome = new LayerBiome(200, MainLayer, biomesForLayer, worldConfig.biomeGroupManager);
                 MainLayer = layerBiome;
             }
 
-            if (worldConfig.IceSize == depth)
-                MainLayer = new LayerIce(depth, MainLayer, worldConfig.IceRarity);
+//            if (worldConfig.IceSize == depth)
+//                MainLayer = new LayerIce(depth, MainLayer, worldConfig.IceRarity);
 
             if (worldConfig.riverRarity == depth)
                 if (worldConfig.randomRivers)
