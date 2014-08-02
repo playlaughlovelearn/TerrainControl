@@ -26,6 +26,7 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
     private int groupid;
     private String name;
     private int rarity;
+    private boolean coldGroup = false;
     private List<String> biomes = new LinkedList<String>();
 
     public BiomeGroup(WorldConfig config, String[] args)
@@ -152,13 +153,26 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
         if (groupid <= BiomeGroupManager.MAX_BIOME_GROUP_COUNT)
         {
             this.groupid = groupid;
-        } else {
+        } else
+        {
             this.groupid = -1;
         }
     }
-    
-    public int getGroupid(){
+
+    public int getGroupid()
+    {
         return this.groupid;
+    }
+
+    public BiomeGroup setColdGroup()
+    {
+        this.coldGroup = true;
+        return this;
+    }
+    
+    public boolean isColdGroup()
+    {
+        return this.coldGroup;
     }
 
 }

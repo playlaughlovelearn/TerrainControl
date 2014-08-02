@@ -527,7 +527,8 @@ public class WorldConfig extends ConfigFile
         }
         if (!cold)
         {
-            groupsToAdd.add(mode_1_7_2 ? WorldStandardValues.R1_7_2_COLD_BIOME_GROUP : WorldStandardValues.ICE_BIOMES);
+            Setting<List<String>> group = mode_1_7_2 ? WorldStandardValues.R1_7_2_COLD_BIOME_GROUP : WorldStandardValues.ICE_BIOMES;
+            this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue(), true);
         }
         if (mode_1_7_2)
         {
@@ -537,11 +538,11 @@ public class WorldConfig extends ConfigFile
             }
             if (!snowy)
             {
-                groupsToAdd.add(WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP);
+                this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP.getName(), WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP.getDefaultValue(), true);
             }
             if (!ocean)
             {
-                groupsToAdd.add(WorldStandardValues.R1_7_2_OCEAN_BIOME_GROUP);
+//                groupsToAdd.add(WorldStandardValues.R1_7_2_OCEAN_BIOME_GROUP);
             }
         }
         for (Setting<List<String>> group : groupsToAdd)

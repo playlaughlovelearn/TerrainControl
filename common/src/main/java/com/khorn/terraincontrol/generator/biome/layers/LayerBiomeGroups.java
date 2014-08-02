@@ -1,10 +1,8 @@
 package com.khorn.terraincontrol.generator.biome.layers;
 
-import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.configuration.BiomeGroup;
 import com.khorn.terraincontrol.configuration.BiomeGroupManager;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
-import com.khorn.terraincontrol.logging.LogMarker;
 
 /**
  * @author Timethor
@@ -40,7 +38,7 @@ public class LayerBiomeGroups extends Layer
                 {
                     if (!entry.getBiomes().isEmpty())
                     {
-                        currentPiece |= (entry.getGroupid() << BiomeGroupShift);
+                        currentPiece |= ((entry.getGroupid() << BiomeGroupShift) | (entry.isColdGroup() ? IceBit : 0));
                     }
                 }
 

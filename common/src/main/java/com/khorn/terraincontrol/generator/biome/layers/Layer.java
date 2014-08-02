@@ -8,6 +8,7 @@ import com.khorn.terraincontrol.configuration.BiomeGroup;
 import com.khorn.terraincontrol.configuration.WorldConfig;
 import com.khorn.terraincontrol.configuration.WorldSettings;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
+import com.khorn.terraincontrol.logging.LogMarker;
 import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 
 import java.util.ArrayList;
@@ -51,17 +52,18 @@ public abstract class Layer
      */
     protected static final int BiomeBits = 1023;            //>>	1st-10th Bits           // 255 63
     protected static final int LandBit = (1 << 10);           //>>	11th Bit, 1024          // 256 64
-    
+
     protected static final int BiomeGroupShift = 11;        //>>	Shift amount for biome group data
     //>>	12th-18th Bits, 260096
     protected static final int BiomeGroupBits = (127 << BiomeGroupShift); //>>	8 Biomes per Group Avg. Sounds reasonable
-    
+
     protected static final int RiverShift = 18;
     protected static final int RiverBits = (3 << RiverShift);         //>>	19th-20th Bits, 786432  //3072 768
     protected static final int RiverBitOne = (1 << RiverShift);       //>>	19th Bit, 262144
     protected static final int RiverBitTwo = (1 << (RiverShift + 1));       //>>	20th Bit, 524288
-    
+
     protected static final int IslandBit = (1 << 20);         //>>	21st Bit, 1048576       // 4096 1024
+    protected static final int IceBit = (1 << 21);
 
     protected static int GetBiomeFromLayer(int BiomeAndLand)
     {
@@ -131,10 +133,12 @@ public abstract class Layer
                     if (!bgs.isEmpty())
                     {
                         GroupLocalBiomes[i] = bgs.toArray(new LocalBiome[bgs.size() + BiomeGroupRarity.get(entry.getKey())]);
+                        TerrainControl.log(LogMarker.INFO, "Group `{}:{}` filling with biomes", entry.getKey(), i);
                         entry.setValue(GroupLocalBiomes);
                     } else
                     {
                         GroupLocalBiomes[i] = new LocalBiome[0];
+                        TerrainControl.log(LogMarker.INFO, "Group `{}:{}` filling with emptiness", entry.getKey(), i);
                         entry.setValue(GroupLocalBiomes);
                     }
                 }
@@ -142,7 +146,9 @@ public abstract class Layer
         }
 
         Layer MainLayer = new LayerEmpty(1L);
-
+        
+        
+        
         Layer RiverLayer = new LayerEmpty(1L);
         boolean riversStarted = false;
 
@@ -162,7 +168,7 @@ public abstract class Layer
 
             if (depth < (worldConfig.LandSize + worldConfig.LandFuzzy))
                 MainLayer = new LayerLandRandom(depth, MainLayer);
-            
+
             MainLayer = new LayerBiomeGroups(35L, MainLayer, worldConfig.biomeGroupManager);
             
             boolean nez = false;
@@ -176,13 +182,11 @@ public abstract class Layer
             }
             if (nez)
             {
-                LayerBiome layerBiome = new LayerBiome(200, MainLayer, biomesForLayer, worldConfig.biomeGroupManager);
-                MainLayer = layerBiome;
+                MainLayer = new LayerBiome(200, MainLayer, biomesForLayer, worldConfig.biomeGroupManager);
             }
 
 //            if (worldConfig.IceSize == depth)
 //                MainLayer = new LayerIce(depth, MainLayer, worldConfig.IceRarity);
-
             if (worldConfig.riverRarity == depth)
                 if (worldConfig.randomRivers)
                 {
@@ -267,13 +271,14 @@ public abstract class Layer
         Layer ZoomedLayer = new LayerZoomVoronoi(10L, MainLayer);
 
         //TemperatureLayer = new LayerTemperatureMix(TemperatureLayer, ZoomedLayer, 0, config);
-
         ZoomedLayer.SetWorldSeed(paramLong);
 
         //MainLayer = new LayerCacheInit(1, MainLayer);
         //ZoomedLayer = new LayerCacheInit(1, ZoomedLayer);
-
-        return new Layer[]{MainLayer, ZoomedLayer};
+        return new Layer[]
+        {
+            MainLayer, ZoomedLayer
+        };
     }
 
     public Layer(long paramLong)

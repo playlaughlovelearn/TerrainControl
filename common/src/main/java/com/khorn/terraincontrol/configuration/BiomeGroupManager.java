@@ -17,7 +17,6 @@ public class BiomeGroupManager
 
     public static final int MAX_BIOME_GROUP_COUNT = 127;
     private int groupCount = 0;
-    private int groupRarityScale = 100;
     private Map<String, Integer> nameToId = new HashMap<String, Integer>(8);
     private Map<Integer, BiomeGroup> idToGroup = new HashMap<Integer, BiomeGroup>(8);
 
@@ -39,6 +38,11 @@ public class BiomeGroupManager
         return null;
     }
 
+    public BiomeGroup registerGroup(WorldConfig config, String[] args, boolean coldGroup)
+    {
+        return this.registerGroup(config, args).setColdGroup();
+    }
+
     public BiomeGroup registerGroup(WorldConfig config, String groupName, List<String> biomes)
     {
         BiomeGroup newGroup = new BiomeGroup(config, groupName, biomes);
@@ -50,6 +54,11 @@ public class BiomeGroupManager
             return newGroup;
         }
         return null;
+    }
+
+    public BiomeGroup registerGroup(WorldConfig config, String groupName, List<String> biomes, boolean coldGroup)
+    {
+        return this.registerGroup(config, groupName, biomes).setColdGroup();
     }
 
     private boolean canAddGroup(String name)

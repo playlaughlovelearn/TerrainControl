@@ -2,10 +2,13 @@ package com.khorn.terraincontrol.generator.biome.layers;
 
 import com.khorn.terraincontrol.LocalBiome;
 import com.khorn.terraincontrol.LocalWorld;
+import com.khorn.terraincontrol.configuration.BiomeGroup;
 import com.khorn.terraincontrol.configuration.WorldConfig;
 import com.khorn.terraincontrol.configuration.WorldSettings;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
+
+import static com.khorn.terraincontrol.generator.biome.layers.Layer.BiomeGroupBits;
 
 public class LayerMixWithRiver extends Layer
 {
@@ -73,9 +76,9 @@ public class LayerMixWithRiver extends Layer
                 currentPiece = arrayOfInt1[(j + i * x_size)];
                 currentRiver = arrayOfInt2[(j + i * x_size)];
 
-                if ((currentPiece & LandBit) != 0)
+                if ((currentPiece & (LandBit | BiomeGroupBits)) != 0)
                     cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean)
+                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
                     cachedId = DefaultBiome.FROZEN_OCEAN.Id;
                 else
                     cachedId = DefaultBiome.OCEAN.Id;
@@ -110,9 +113,9 @@ public class LayerMixWithRiver extends Layer
                 currentPiece = arrayOfInt1[(j + i * x_size)];
                 // currentRiver = arrayOfInt2[(j + i * x_size)];
 
-                if ((currentPiece & LandBit) != 0)
+                if ((currentPiece & (LandBit | BiomeGroupBits)) != 0)
                     cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean)
+                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
                     cachedId = DefaultBiome.FROZEN_OCEAN.Id;
                 else
                     cachedId = DefaultBiome.OCEAN.Id;
@@ -145,10 +148,10 @@ public class LayerMixWithRiver extends Layer
             {
                 currentPiece = arrayOfInt1[(j + i * x_size)];
                 currentRiver = arrayOfInt2[(j + i * x_size)];
-
-                if ((currentPiece & LandBit) != 0)
+                
+                if ((currentPiece & (LandBit)) == 0)
                     cachedId = currentPiece & BiomeBits;
-                else if (worldConfig.FrozenOcean)
+                else if (worldConfig.FrozenOcean && (currentPiece & IceBit) != 0)
                     cachedId = DefaultBiome.FROZEN_OCEAN.Id;
                 else
                     cachedId = DefaultBiome.OCEAN.Id;

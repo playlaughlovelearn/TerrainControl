@@ -1,11 +1,9 @@
 package com.khorn.terraincontrol.generator.biome.layers;
 
 import com.khorn.terraincontrol.LocalBiome;
-import com.khorn.terraincontrol.TerrainControl;
 import com.khorn.terraincontrol.configuration.BiomeGroup;
 import com.khorn.terraincontrol.configuration.BiomeGroupManager;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
-import com.khorn.terraincontrol.logging.LogMarker;
 import java.util.Map;
 
 public class LayerBiome extends Layer
@@ -44,8 +42,8 @@ public class LayerBiome extends Layer
                         LocalBiome biome = localBiomes[nextInt(localBiomes.length)];
                         if (biome != null)
                             currentPiece |= biome.getIds().getGenerationId();
-                        else
-                            TerrainControl.log(LogMarker.INFO, "Group Biome Bits Failed: `{}`->`{}`", Integer.toBinaryString(currentPiece), (currentPiece & BiomeGroupBits) >> BiomeGroupShift);
+//                        else
+//                            TerrainControl.log(LogMarker.INFO, "Group Biome Bits Failed: `{}`->`{}`", Integer.toBinaryString(currentPiece), (currentPiece & BiomeGroupBits) >> BiomeGroupShift);
                     }
                 }
                 arrayOfInt2[(j + i * x_size)] = currentPiece;
