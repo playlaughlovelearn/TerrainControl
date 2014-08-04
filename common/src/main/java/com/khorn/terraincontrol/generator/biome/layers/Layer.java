@@ -9,9 +9,10 @@ import com.khorn.terraincontrol.configuration.WorldConfig;
 import com.khorn.terraincontrol.configuration.WorldSettings;
 import com.khorn.terraincontrol.generator.biome.ArraysCache;
 import com.khorn.terraincontrol.logging.LogMarker;
-import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -50,20 +51,24 @@ public abstract class Layer
      * 6) Rivers
      * 7) Rivers size
      */
+    
+    // [ Biome Data ]
     protected static final int BiomeBits = 1023;            //>>	1st-10th Bits           // 255 63
-    protected static final int LandBit = (1 << 10);           //>>	11th Bit, 1024          // 256 64
-
-    protected static final int BiomeGroupShift = 11;        //>>	Shift amount for biome group data
-    //>>	12th-18th Bits, 260096
-    protected static final int BiomeGroupBits = (127 << BiomeGroupShift); //>>	8 Biomes per Group Avg. Sounds reasonable
-
-    protected static final int RiverShift = 18;
-    protected static final int RiverBits = (3 << RiverShift);         //>>	19th-20th Bits, 786432  //3072 768
-    protected static final int RiverBitOne = (1 << RiverShift);       //>>	19th Bit, 262144
-    protected static final int RiverBitTwo = (1 << (RiverShift + 1));       //>>	20th Bit, 524288
-
-    protected static final int IslandBit = (1 << 20);         //>>	21st Bit, 1048576       // 4096 1024
-    protected static final int IceBit = (1 << 21);
+    
+    // [ Flags ]
+    protected static final int LandBit = (1 << 10);         //>>	11th Bit, 1024          // 256 64
+    protected static final int IslandBit = (1 << 11);       //>>	12th Bit, 2048          // 4096 1024
+    protected static final int IceBit = (1 << 12);          //>>	13th Bit, 4096
+    
+    // [ Biome Group Data ]
+    protected static final int BiomeGroupShift = 13;        //>>	Shift amount for biome group data
+    protected static final int BiomeGroupBits = (127 << BiomeGroupShift);   //>>	14th-20th Bits, 1040384
+    
+    // [ River Data ]
+    protected static final int RiverShift = 20;
+    protected static final int RiverBits = (3 << RiverShift);               //>>	21st-22nd Bits, 3145728  //3072 768
+    protected static final int RiverBitOne = (1 << RiverShift);             //>>	21st Bit, 1048576
+    protected static final int RiverBitTwo = (1 << (RiverShift + 1));       //>>	22nd Bit, 2097152
 
     protected static int GetBiomeFromLayer(int BiomeAndLand)
     {
@@ -83,9 +88,10 @@ public abstract class Layer
         WorldSettings configs = world.getSettings();
         WorldConfig worldConfig = configs.worldConfig;
 
-        Map<String, LocalBiome[][]> GroupBiomeMap = new HashMap<String, LocalBiome[][]>();
+        Map<String, LocalBiome[][]> GroupBiomeMap = new HashMap<String, LocalBiome[][]>(4);
+        Map<String, Integer> BiomeGroupRarity = new HashMap<String, Integer>(4);
+        
         //>>	Init GroupBiomeMap
-        Map<String, Integer> BiomeGroupRarity = new HashMap<String, Integer>();
         for (BiomeGroup group : worldConfig.biomeGroupManager.getGroups())
         {
             GroupBiomeMap.put(group.getName(), new LocalBiome[worldConfig.GenerationDepth + 1][]);
@@ -94,7 +100,7 @@ public abstract class Layer
 
         for (int i = 0; i < worldConfig.GenerationDepth + 1; i++)
         {
-            Map<String, ArrayList<LocalBiome>> BiomeGroups = new HashMap<String, ArrayList<LocalBiome>>();
+            Map<String, ArrayList<LocalBiome>> BiomeGroups = new HashMap<String, ArrayList<LocalBiome>>(4);
             //>>	Init BiomeGroups
             for (BiomeGroup group : worldConfig.biomeGroupManager.getGroups())
             {
@@ -168,16 +174,34 @@ public abstract class Layer
 
             if (depth < (worldConfig.LandSize + worldConfig.LandFuzzy))
                 MainLayer = new LayerLandRandom(depth, MainLayer);
-
-            MainLayer = new LayerBiomeGroups(35L, MainLayer, worldConfig.biomeGroupManager);
+            
+            int size = 1;
+            int level = 2;
+            if (depth-size >= 0 && depth-size <= level)
+                MainLayer = new LayerBiomeGroups(35L + (depth*depth), MainLayer, worldConfig.biomeGroupManager);
             
             boolean nez = false;
             Map<String, LocalBiome[]> biomesForLayer = new HashMap<String, LocalBiome[]>(4);
             for (Entry<String, LocalBiome[][]> entry : GroupBiomeMap.entrySet())
             {
                 LocalBiome[][] localBiomes = entry.getValue();
+                //>>	TEMPORARY FIX FOR OCEAN IN BIOME GROUPS
+                /**/    ArrayList<LocalBiome> biomes  = new ArrayList<LocalBiome>(Arrays.asList(localBiomes[depth]));
+                /**/    biomes.removeAll(Collections.singleton(null));
+                /**/    localBiomes[depth] = biomes.toArray(new LocalBiome[biomes.size()]);
+                //>>	END TEMP FIX
                 int len = localBiomes[depth].length;
                 if (len != 0){ nez = true; }
+                for (LocalBiome localBiome : localBiomes[depth])
+                {
+                    if (localBiome == null)
+                    {
+                        TerrainControl.log(LogMarker.INFO, "WARNING: NULL Biomes being set on {} at depth {}!", entry.getKey(), depth);
+                    } else if (localBiome.getName().contains("Ocean"))
+                    {
+                        TerrainControl.log(LogMarker.INFO, "WARNING: Ocean Biomes being set on {} at depth {}!", entry.getKey(), depth);
+                    }
+                }
                 biomesForLayer.put(entry.getKey(), localBiomes[depth]);
             }
             if (nez)
@@ -187,69 +211,70 @@ public abstract class Layer
 
 //            if (worldConfig.IceSize == depth)
 //                MainLayer = new LayerIce(depth, MainLayer, worldConfig.IceRarity);
-            if (worldConfig.riverRarity == depth)
-                if (worldConfig.randomRivers)
-                {
-                    RiverLayer = new LayerRiverInit(155, RiverLayer);
-                    riversStarted = true;
-                } else
-                    MainLayer = new LayerRiverInit(155, MainLayer);
-
-            if ((worldConfig.GenerationDepth - worldConfig.riverSize) == depth)
-            {
-                if (worldConfig.randomRivers)
-                    RiverLayer = new LayerRiver(5 + depth, RiverLayer);
-                else
-                    MainLayer = new LayerRiver(5 + depth, MainLayer);
-            }
-
-            LayerBiomeBorder layerBiomeBorder = new LayerBiomeBorder(3000 + depth, world);
-            boolean haveBorder = false;
-            for (LocalBiome biome : configs.biomes)
-            {
-                if (biome == null)
-                    continue;
-                BiomeConfig biomeConfig = biome.getBiomeConfig();
-                if (biomeConfig.biomeSize != depth)
-                    continue;
-                if (worldConfig.IsleBiomes.contains(biomeConfig.name) && biomeConfig.isleInBiome != null)
-                {
-                    int id = biome.getIds().getGenerationId();
-
-                    LayerBiomeInBiome layerBiome = new LayerBiomeInBiome(4000 + id, MainLayer);
-                    layerBiome.biome = biome;
-                    for (String islandInName : biomeConfig.isleInBiome)
-                    {
-                        int islandIn = world.getBiomeByName(islandInName).getIds().getGenerationId();
-                        if (islandIn == DefaultBiome.OCEAN.Id)
-                            layerBiome.inOcean = true;
-                        else
-                            layerBiome.BiomeIsles[islandIn] = true;
-                    }
-
-                    layerBiome.chance = (worldConfig.BiomeRarityScale + 1) - biomeConfig.biomeRarity;
-                    MainLayer = layerBiome;
-                }
-
-                if (worldConfig.BorderBiomes.contains(biomeConfig.name) && biomeConfig.biomeIsBorder != null)
-                {
-                    haveBorder = true;
-
-                    for (String replaceFromName : biomeConfig.biomeIsBorder)
-                    {
-                        int replaceFrom = world.getBiomeByName(replaceFromName).getIds().getGenerationId();
-                        layerBiomeBorder.AddBiome(biome, replaceFrom, world);
-
-                    }
-
-                }
-            }
-
-            if (haveBorder)
-            {
-                layerBiomeBorder.child = MainLayer;
-                MainLayer = layerBiomeBorder;
-            }
+            
+//            if (worldConfig.riverRarity == depth)
+//                if (worldConfig.randomRivers)
+//                {
+//                    RiverLayer = new LayerRiverInit(155, RiverLayer);
+//                    riversStarted = true;
+//                } else
+//                    MainLayer = new LayerRiverInit(155, MainLayer);
+//
+//            if ((worldConfig.GenerationDepth - worldConfig.riverSize) == depth)
+//            {
+//                if (worldConfig.randomRivers)
+//                    RiverLayer = new LayerRiver(5 + depth, RiverLayer);
+//                else
+//                    MainLayer = new LayerRiver(5 + depth, MainLayer);
+//            }
+//
+//            LayerBiomeBorder layerBiomeBorder = new LayerBiomeBorder(3000 + depth, world);
+//            boolean haveBorder = false;
+//            for (LocalBiome biome : configs.biomes)
+//            {
+//                if (biome == null)
+//                    continue;
+//                BiomeConfig biomeConfig = biome.getBiomeConfig();
+//                if (biomeConfig.biomeSize != depth)
+//                    continue;
+//                if (worldConfig.IsleBiomes.contains(biomeConfig.name) && biomeConfig.isleInBiome != null)
+//                {
+//                    int id = biome.getIds().getGenerationId();
+//
+//                    LayerBiomeInBiome layerBiome = new LayerBiomeInBiome(4000 + id, MainLayer);
+//                    layerBiome.biome = biome;
+//                    for (String islandInName : biomeConfig.isleInBiome)
+//                    {
+//                        int islandIn = world.getBiomeByName(islandInName).getIds().getGenerationId();
+//                        if (islandIn == DefaultBiome.OCEAN.Id)
+//                            layerBiome.inOcean = true;
+//                        else
+//                            layerBiome.BiomeIsles[islandIn] = true;
+//                    }
+//
+//                    layerBiome.chance = (worldConfig.BiomeRarityScale + 1) - biomeConfig.biomeRarity;
+//                    MainLayer = layerBiome;
+//                }
+//
+//                if (worldConfig.BorderBiomes.contains(biomeConfig.name) && biomeConfig.biomeIsBorder != null)
+//                {
+//                    haveBorder = true;
+//
+//                    for (String replaceFromName : biomeConfig.biomeIsBorder)
+//                    {
+//                        int replaceFrom = world.getBiomeByName(replaceFromName).getIds().getGenerationId();
+//                        layerBiomeBorder.AddBiome(biome, replaceFrom, world);
+//
+//                    }
+//
+//                }
+//            }
+//
+//            if (haveBorder)
+//            {
+//                layerBiomeBorder.child = MainLayer;
+//                MainLayer = layerBiomeBorder;
+//            }
 
         }
         if (worldConfig.randomRivers)

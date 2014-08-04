@@ -322,7 +322,7 @@ public class WorldConfig extends ConfigFile
         this.SettingsMode = readSettings(WorldStandardValues.SETTINGS_MODE);
         this.ModeTerrain = readSettings(WorldStandardValues.TERRAIN_MODE);
         this.biomeMode = TerrainControl.getBiomeModeManager().getBiomeManager(readSettings(WorldStandardValues.BIOME_MODE));
-
+        TerrainControl.log(LogMarker.INFO, "Setting BiomeMode: {}", this.biomeMode.getName());
         // World and water height
         this.worldHeightCapBits = readSettings(WorldStandardValues.WORLD_HEIGHT_CAP_BITS);
         this.worldHeightCap = 1 << this.worldHeightCapBits;
@@ -471,83 +471,33 @@ public class WorldConfig extends ConfigFile
     
     private void ReadBiomeGroups()
     {
-        boolean dry = false, lush = false, cold = false, snowy = false, ocean = false;
-        boolean mode_1_7_2 = this.biomeMode == TerrainControl.getBiomeModeManager().RELEASE_1_7_2;
-        
-    //>>	POPULATE WITH DEFAULTS
-        //>>	Get default of present values
-        List<String> v1_6_4NormalGroup = readSettings(WorldStandardValues.NORMAL_BIOMES, mode_1_7_2 ? null : WorldStandardValues.NORMAL_BIOMES.getDefaultValue());
-        List<String> v1_6_4IceGroup = readSettings(WorldStandardValues.ICE_BIOMES, mode_1_7_2 ? null : WorldStandardValues.ICE_BIOMES.getDefaultValue());
-        //>>	Medium will map to the old NORMAL
-        if (v1_6_4NormalGroup != null && !v1_6_4NormalGroup.isEmpty())
+        Setting<List<String>> group;
+        boolean mode_1_7_2 = this.biomeMode.getName().equals(TerrainControl.getBiomeModeManager().RELEASE_1_7_2.getName());
+    //>>	Populate manager with defaults, anything found will override the existing
+        group = mode_1_7_2 ? WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP : WorldStandardValues.NORMAL_BIOMES;
+        this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue());
+        group = mode_1_7_2 ? WorldStandardValues.R1_7_2_COLD_BIOME_GROUP : WorldStandardValues.ICE_BIOMES;
+        this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue(), true);
+        if (mode_1_7_2)
         {
+            group = WorldStandardValues.R1_7_2_DRY_WARM_BIOME_GROUP;
+            this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue());
+            group = WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP;
+            this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue(), true);
+        }
+    //>>	Check for old settings
+        List<String> v1_6_4NormalGroup = readSettings(WorldStandardValues.NORMAL_BIOMES, mode_1_7_2 ? null : WorldStandardValues.NORMAL_BIOMES.getDefaultValue());
+        if (v1_6_4NormalGroup != null){
             this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName(), v1_6_4NormalGroup);
         }
-        //>>	Cold will match to the old ICE
-        if (v1_6_4IceGroup != null && !v1_6_4IceGroup.isEmpty())
-        {
-            this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName(), v1_6_4IceGroup);
+        List<String> v1_6_4IceGroup = readSettings(WorldStandardValues.ICE_BIOMES, mode_1_7_2 ? null : WorldStandardValues.ICE_BIOMES.getDefaultValue());
+        if (v1_6_4NormalGroup != null){
+            this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName(), v1_6_4IceGroup, true);
         }
-    //>>	END: POPULATE WITH DEFAULTS
-
-    //>>	SCAN FOR CONFIG ENTRIES
+    //>>	Scan for new style settings
         for (Map.Entry<String, String> entry : this.settingsCache.entrySet())
         {
             BiomeGroup res = getBiomeGroup(entry);
-            if (res != null && res.getHolderType() != null)
-            {
-                //>>	if we added to the groups, check it off the list to add for defaults
-                if (res.getName().equals(WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName()))
-                {
-                    lush = true;
-                } else if (res.getName().equals(WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName()))
-                {
-                    cold = true;
-                } else if (mode_1_7_2)
-                {
-                    if (res.getName().equals(WorldStandardValues.R1_7_2_DRY_WARM_BIOME_GROUP.getName()))
-                    {
-                        dry = true;
-                    } else if (res.getName().equals(WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP.getName()))
-                    {
-                        snowy = true;
-                    } else if (res.getName().equals(WorldStandardValues.R1_7_2_OCEAN_BIOME_GROUP.getName()))
-                    {
-                        ocean = true;
-                    }
-                }
-            }
-        }
-    //>>	END: SCAN FOR CONFIG ENTRIES
-        //t>>	Kinda a messy and basic solution but we'll come back and clean things up
-        List<Setting<List<String>>> groupsToAdd = new ArrayList<Setting<List<String>>>(8);
-        if (!lush)
-        {
-            groupsToAdd.add(mode_1_7_2 ? WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP : WorldStandardValues.NORMAL_BIOMES);
-        }
-        if (!cold)
-        {
-            Setting<List<String>> group = mode_1_7_2 ? WorldStandardValues.R1_7_2_COLD_BIOME_GROUP : WorldStandardValues.ICE_BIOMES;
-            this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue(), true);
-        }
-        if (mode_1_7_2)
-        {
-            if (!dry)
-            {
-                groupsToAdd.add(WorldStandardValues.R1_7_2_DRY_WARM_BIOME_GROUP);
-            }
-            if (!snowy)
-            {
-                this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP.getName(), WorldStandardValues.R1_7_2_SNOWY_BIOME_GROUP.getDefaultValue(), true);
-            }
-            if (!ocean)
-            {
-//                groupsToAdd.add(WorldStandardValues.R1_7_2_OCEAN_BIOME_GROUP);
-            }
-        }
-        for (Setting<List<String>> group : groupsToAdd)
-        {
-            this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue());
         }
     }
 

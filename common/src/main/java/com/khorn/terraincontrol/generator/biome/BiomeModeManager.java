@@ -17,7 +17,7 @@ public class BiomeModeManager
     private Map<String, Class<? extends BiomeGenerator>> registered = new HashMap<String, Class<? extends BiomeGenerator>>();
 
     public final Class<NormalBiomeGenerator> NORMAL = register("Normal", NormalBiomeGenerator.class);
-    public final Class<NormalBiomeGenerator> RELEASE_1_7_2 = register("Release_1_7_2", NormalBiomeGenerator.class);
+    public final Class<Release_1_7_BiomeGenerator> RELEASE_1_7_2 = register("Release_1_7_2", Release_1_7_BiomeGenerator.class);
     public final Class<FromImageBiomeGenerator> FROM_IMAGE = register("FromImage", FromImageBiomeGenerator.class);
     public final Class<OldBiomeGenerator> OLD_GENERATOR = register("OldGenerator", OldBiomeGenerator.class);
     public final Class<VanillaBiomeGenerator> VANILLA = register("Default", VanillaBiomeGenerator.class);

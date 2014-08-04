@@ -28,14 +28,7 @@ public class BiomeGroupManager
     public BiomeGroup registerGroup(WorldConfig config, String[] args)
     {
         BiomeGroup newGroup = new BiomeGroup(config, args);
-        if (canAddGroup(newGroup.getName()))
-        {
-            nameToId.put(newGroup.getName(), ++groupCount);
-            newGroup.setGroupid(groupCount);
-            idToGroup.put(groupCount, newGroup);
-            return newGroup;
-        }
-        return null;
+        return __register(newGroup);
     }
 
     public BiomeGroup registerGroup(WorldConfig config, String[] args, boolean coldGroup)
@@ -46,14 +39,7 @@ public class BiomeGroupManager
     public BiomeGroup registerGroup(WorldConfig config, String groupName, List<String> biomes)
     {
         BiomeGroup newGroup = new BiomeGroup(config, groupName, biomes);
-        if (canAddGroup(groupName))
-        {
-            nameToId.put(groupName, ++groupCount);
-            newGroup.setGroupid(groupCount);
-            idToGroup.put(groupCount, newGroup);
-            return newGroup;
-        }
-        return null;
+        return __register(newGroup);
     }
 
     public BiomeGroup registerGroup(WorldConfig config, String groupName, List<String> biomes, boolean coldGroup)
@@ -61,11 +47,32 @@ public class BiomeGroupManager
         return this.registerGroup(config, groupName, biomes).setColdGroup();
     }
 
+    private BiomeGroup __register(BiomeGroup newGroup)
+    {
+        if (canAddGroup(newGroup.getName()))
+        {
+            if (nameToId.get(newGroup.getName()) != null)
+            {
+                newGroup.setGroupid(groupCount);
+                idToGroup.put(groupCount, newGroup);
+            } else
+            {
+                nameToId.put(newGroup.getName(), ++groupCount);
+                newGroup.setGroupid(groupCount);
+                idToGroup.put(groupCount, newGroup);
+            }
+
+            return newGroup;
+        }
+        return null;
+    }
+
     private boolean canAddGroup(String name)
     {
         if (groupCount < MAX_BIOME_GROUP_COUNT)
         {
-            TerrainControl.log(LogMarker.INFO, "Biome group `{}` was added as `{}`.", name, groupCount+1);
+            TerrainControl.log(LogMarker.INFO, "Biome group `{}` was added as `{}`.", name, groupCount + 1);
+            TerrainControl.log(LogMarker.INFO, "-------------------------------");
             return true;
         }
         TerrainControl.log(LogMarker.WARN, "Biome group `{}` could not be added. Max biome group count reached.", name);
@@ -81,8 +88,9 @@ public class BiomeGroupManager
     {
         return getGroup(nameToId.get(name));
     }
-    
-    public Collection<BiomeGroup> getGroups(){
+
+    public Collection<BiomeGroup> getGroups()
+    {
         return idToGroup.values();
     }
 
