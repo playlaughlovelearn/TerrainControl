@@ -15,21 +15,21 @@ public class LayerLand extends Layer
     public int chance = 5;
 
     @Override
-    public int[] GetBiomes(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
+    public int[] GetBiomes(ArraysCache arraysCache, int x, int z, int xSize, int zSize)
     {
 
-        int[] arrayOfInt1 = this.child.GetBiomes(arraysCache, x, z, x_size, z_size);
+        int[] arrayOfInt1 = this.child.GetBiomes(arraysCache, x, z, xSize, zSize);
 
-        int[] arrayOfInt2 = arraysCache.GetArray(x_size * z_size);
-        for (int i = 0; i < z_size; i++)
+        int[] arrayOfInt2 = arraysCache.GetArray(xSize * zSize);
+        for (int i = 0; i < zSize; i++)
         {
-            for (int j = 0; j < x_size; j++)
+            for (int j = 0; j < xSize; j++)
             {
                 SetSeed(x + j, z + i);
                 if (nextInt(chance) == 0)
-                    arrayOfInt2[(j + i * x_size)] = arrayOfInt1[(j + i * x_size)] | LandBit;
+                    arrayOfInt2[(j + i * xSize)] = arrayOfInt1[(j + i * xSize)] | LandBit;
                 else
-                    arrayOfInt2[(j + i * x_size)] = arrayOfInt1[(j + i * x_size)];
+                    arrayOfInt2[(j + i * xSize)] = arrayOfInt1[(j + i * xSize)];
             }
         }
         

@@ -17,20 +17,6 @@ public class LayerEmpty extends Layer
         for (int i = 0; i < arrayOfInt.length; i++)
             arrayOfInt[i] = 0;
 
-//        for (int zi = 0; zi < z_size; ++zi)
-//        {
-//            for (int xi = 0; xi < x_size; ++xi)
-//            {
-//                this.SetSeed((long) (x + xi), (long) (z + zi));
-//                arrayOfInt[xi + zi * x_size] |= this.nextInt(10) == 0 ? LandBit : 0;
-//            }
-//        }
-//
-//        if (x > -x_size && x <= 0 && z > -z_size && z <= 0)
-//        {
-//            arrayOfInt[-x + -z * x_size] |= LandBit;
-//        }
-
         return arrayOfInt;
     }
 

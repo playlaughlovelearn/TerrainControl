@@ -37,9 +37,9 @@ public class LayerBiomeGroups extends Layer
 
                 if ((currentPiece & LandBit) != 0 && (currentPiece & BiomeGroupBits) == 0)    // land without biome group
                 {
-                    currentPiece |= ((entry.getGroupid() << BiomeGroupShift) | (entry.isColdGroup() ? IceBit : 0));
+//                    currentPiece |= ((entry.getGroupid() << BiomeGroupShift) | (entry.isColdGroup() ? IceBit : 0));
                     //>>	Uncomment the line below and comment the line above to visualize biome groups
-//                    currentPiece |= (entry.getGroupid() + 15) | (entry.isColdGroup() ? IceBit : 0);
+                    currentPiece |= (entry.getGroupid() + 15) | (entry.isColdGroup() ? IceBit : 0);
                 }
 
                 arrayOfInt2[(j + i * x_size)] = currentPiece;

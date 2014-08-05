@@ -499,7 +499,7 @@ public class WorldConfig extends ConfigFile
     //>>	Scan for new style settings
         for (Map.Entry<String, String> entry : this.settingsCache.entrySet())
         {
-            BiomeGroup res = getBiomeGroup(entry);
+            getBiomeGroup(entry);
         }
     }
 
