@@ -8,6 +8,7 @@ import com.khorn.terraincontrol.configuration.settingType.Setting;
 import com.khorn.terraincontrol.configuration.standard.WorldStandardValues;
 import com.khorn.terraincontrol.customobjects.CustomObject;
 import com.khorn.terraincontrol.generator.biome.BiomeGenerator;
+import com.khorn.terraincontrol.generator.biome.BiomeModeManager;
 import com.khorn.terraincontrol.logging.LogMarker;
 import com.khorn.terraincontrol.util.helpers.StringHelper;
 import com.khorn.terraincontrol.util.minecraftTypes.DefaultBiome;
@@ -472,12 +473,13 @@ public class WorldConfig extends ConfigFile
     private void ReadBiomeGroups()
     {
         Setting<List<String>> group;
-        boolean mode_1_7_2 = this.biomeMode.getName().equals(TerrainControl.getBiomeModeManager().RELEASE_1_7_2.getName());
+        BiomeModeManager modeManager = TerrainControl.getBiomeModeManager();
+        boolean mode_1_7_2 = modeManager.getName(this.biomeMode).equals(modeManager.getName(modeManager.RELEASE_1_7_2));
     //>>	Populate manager with defaults, anything found will override the existing
         group = mode_1_7_2 ? WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP : WorldStandardValues.NORMAL_BIOMES;
-        this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue());
+        this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName(), group.getDefaultValue());
         group = mode_1_7_2 ? WorldStandardValues.R1_7_2_COLD_BIOME_GROUP : WorldStandardValues.ICE_BIOMES;
-        this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue(), true);
+        this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName(), group.getDefaultValue(), true);
         if (mode_1_7_2)
         {
             group = WorldStandardValues.R1_7_2_DRY_WARM_BIOME_GROUP;
@@ -486,12 +488,12 @@ public class WorldConfig extends ConfigFile
             this.biomeGroupManager.registerGroup(this, group.getName(), group.getDefaultValue(), true);
         }
     //>>	Check for old settings
-        List<String> v1_6_4NormalGroup = readSettings(WorldStandardValues.NORMAL_BIOMES, mode_1_7_2 ? null : WorldStandardValues.NORMAL_BIOMES.getDefaultValue());
+        List<String> v1_6_4NormalGroup = readSettings(WorldStandardValues.NORMAL_BIOMES, null);
         if (v1_6_4NormalGroup != null){
             this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_MEDIUM_LUSH_BIOME_GROUP.getName(), v1_6_4NormalGroup);
         }
-        List<String> v1_6_4IceGroup = readSettings(WorldStandardValues.ICE_BIOMES, mode_1_7_2 ? null : WorldStandardValues.ICE_BIOMES.getDefaultValue());
-        if (v1_6_4NormalGroup != null){
+        List<String> v1_6_4IceGroup = readSettings(WorldStandardValues.ICE_BIOMES, null);
+        if (v1_6_4IceGroup != null){
             this.biomeGroupManager.registerGroup(this, WorldStandardValues.R1_7_2_COLD_BIOME_GROUP.getName(), v1_6_4IceGroup, true);
         }
     //>>	Scan for new style settings

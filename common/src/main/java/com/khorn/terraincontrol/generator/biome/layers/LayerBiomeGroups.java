@@ -23,22 +23,23 @@ public class LayerBiomeGroups extends Layer
     public int[] GetBiomes(ArraysCache arraysCache, int x, int z, int x_size, int z_size)
     {
         int[] arrayOfInt1 = this.child.GetBiomes(arraysCache, x, z, x_size, z_size);
-
         int[] arrayOfInt2 = arraysCache.GetArray(x_size * z_size);
+        
         for (int i = 0; i < z_size; i++)
         {
             for (int j = 0; j < x_size; j++)
             {
                 SetSeed(j + x, i + z);
                 int currentPiece = arrayOfInt1[(j + i * x_size)];
+                BiomeGroup entry;
+                
+                entry = biomeGroupManager.getGroup(nextInt(biomeGroupManager.getGroups().size()) + 1);
 
-                BiomeGroup entry = biomeGroupManager.getGroup(nextInt(biomeGroupManager.getGroups().size()) + 1);
-
-                if (!entry.getBiomes().isEmpty() && (currentPiece & LandBit) != 0 && (currentPiece & BiomeGroupBits) == 0)    // land without biome group
+                if ((currentPiece & LandBit) != 0 && (currentPiece & BiomeGroupBits) == 0)    // land without biome group
                 {
                     currentPiece |= ((entry.getGroupid() << BiomeGroupShift) | (entry.isColdGroup() ? IceBit : 0));
                     //>>	Uncomment the line below and comment the line above to visualize biome groups
-                    // currentPiece |= (entry.getGroupid() + 15) | (entry.isColdGroup() ? IceBit : 0);
+//                    currentPiece |= (entry.getGroupid() + 15) | (entry.isColdGroup() ? IceBit : 0);
                 }
 
                 arrayOfInt2[(j + i * x_size)] = currentPiece;

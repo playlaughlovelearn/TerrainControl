@@ -26,6 +26,9 @@ public class BiomeGroup extends ConfigFunction<WorldConfig>
     private int groupid;
     private String name;
     private int rarity;
+    private int size = 0;
+    private int numBiomes = 0;
+    private float avgTemp = 0;
     private boolean coldGroup = false;
     private List<String> biomes = new LinkedList<String>();
 

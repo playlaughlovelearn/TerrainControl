@@ -17,6 +17,7 @@ public class BiomeGroupManager
 
     public static final int MAX_BIOME_GROUP_COUNT = 127;
     private int groupCount = 0;
+    private int globalBiomeCount = 0;
     private Map<String, Integer> nameToId = new HashMap<String, Integer>(8);
     private Map<Integer, BiomeGroup> idToGroup = new HashMap<Integer, BiomeGroup>(8);
 
@@ -51,15 +52,20 @@ public class BiomeGroupManager
     {
         if (canAddGroup(newGroup.getName()))
         {
-            if (nameToId.get(newGroup.getName()) != null)
+            Integer existing = nameToId.get(newGroup.getName());
+            if (existing != null)
             {
-                newGroup.setGroupid(groupCount);
-                idToGroup.put(groupCount, newGroup);
+                newGroup.setGroupid(existing);
+                idToGroup.put(existing, newGroup);
+                TerrainControl.log(LogMarker.INFO, "Biome group `{}` was added as `{}`.", newGroup.getName(), existing);
+                TerrainControl.log(LogMarker.INFO, "-------------------------------");
             } else
             {
                 nameToId.put(newGroup.getName(), ++groupCount);
                 newGroup.setGroupid(groupCount);
                 idToGroup.put(groupCount, newGroup);
+                TerrainControl.log(LogMarker.INFO, "Biome group `{}` was added as `{}`.", newGroup.getName(), groupCount);
+                TerrainControl.log(LogMarker.INFO, "-------------------------------");
             }
 
             return newGroup;
@@ -71,8 +77,6 @@ public class BiomeGroupManager
     {
         if (groupCount < MAX_BIOME_GROUP_COUNT)
         {
-            TerrainControl.log(LogMarker.INFO, "Biome group `{}` was added as `{}`.", name, groupCount + 1);
-            TerrainControl.log(LogMarker.INFO, "-------------------------------");
             return true;
         }
         TerrainControl.log(LogMarker.WARN, "Biome group `{}` could not be added. Max biome group count reached.", name);

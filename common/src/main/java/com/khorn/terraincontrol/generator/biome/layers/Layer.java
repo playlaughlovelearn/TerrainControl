@@ -175,9 +175,8 @@ public abstract class Layer
             if (depth < (worldConfig.LandSize + worldConfig.LandFuzzy))
                 MainLayer = new LayerLandRandom(depth, MainLayer);
             
-            int size = 1;
-            int level = 2;
-            if (depth-size >= 0 && depth-size <= level)
+            int size = 2;
+            if (size == depth)
                 MainLayer = new LayerBiomeGroups(35L + (depth*depth), MainLayer, worldConfig.biomeGroupManager);
             
             boolean nez = false;
